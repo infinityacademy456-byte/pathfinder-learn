@@ -7,6 +7,11 @@ import {
   Bot,
   User,
   Infinity,
+  BarChart3,
+  Trophy,
+  MessageSquare,
+  Award,
+  Sparkles,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 import { useLocation } from "react-router-dom";
@@ -14,6 +19,7 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
+  SidebarGroupLabel,
   SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
@@ -22,20 +28,55 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
-const navItems = [
+const mainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Learning Paths", url: "/paths", icon: Route },
   { title: "Courses", url: "/courses/py-101", icon: BookOpen },
   { title: "Practice", url: "/practice", icon: Code2 },
   { title: "Projects", url: "/projects", icon: FolderKanban },
   { title: "AI Assistant", url: "/assistant", icon: Bot },
+];
+
+const insightItems = [
+  { title: "Analytics", url: "/analytics", icon: BarChart3 },
+  { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
+  { title: "Certificates", url: "/certificates", icon: Award },
+];
+
+const socialItems = [
+  { title: "Community", url: "/community", icon: MessageSquare },
+  { title: "Subscription", url: "/subscription", icon: Sparkles },
   { title: "Profile", url: "/profile", icon: User },
 ];
 
 export function AppSidebar() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
-  const location = useLocation();
+
+  const renderGroup = (label: string, items: typeof mainItems) => (
+    <SidebarGroup>
+      {!collapsed && <SidebarGroupLabel className="text-sidebar-foreground/50 text-[10px] uppercase tracking-wider">{label}</SidebarGroupLabel>}
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {items.map((item) => (
+            <SidebarMenuItem key={item.title}>
+              <SidebarMenuButton asChild>
+                <NavLink
+                  to={item.url}
+                  end={item.url === "/"}
+                  className="hover:bg-sidebar-accent/50 transition-colors"
+                  activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+                >
+                  <item.icon className="mr-2 h-4 w-4 shrink-0" />
+                  {!collapsed && <span>{item.title}</span>}
+                </NavLink>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
 
   return (
     <Sidebar collapsible="icon">
@@ -52,27 +93,9 @@ export function AppSidebar() {
         </div>
       </SidebarHeader>
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {navItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <NavLink
-                      to={item.url}
-                      end={item.url === "/"}
-                      className="hover:bg-sidebar-accent/50 transition-colors"
-                      activeClassName="bg-sidebar-accent text-sidebar-accent-foreground font-medium"
-                    >
-                      <item.icon className="mr-2 h-4 w-4 shrink-0" />
-                      {!collapsed && <span>{item.title}</span>}
-                    </NavLink>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {renderGroup("Learn", mainItems)}
+        {renderGroup("Insights", insightItems)}
+        {renderGroup("More", socialItems)}
       </SidebarContent>
     </Sidebar>
   );

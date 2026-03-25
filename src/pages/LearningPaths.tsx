@@ -1,80 +1,120 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { Clock, BookOpen, ArrowRight } from "lucide-react";
+import { Clock, BookOpen, ArrowRight, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { learningPaths } from "@/data/mockData";
 import { ProgressRing } from "@/components/ProgressRing";
 
+type LevelFilter = "all" | "beginner" | "intermediate" | "advanced";
+
 export default function LearningPaths() {
+  const [levelFilter, setLevelFilter] = useState<LevelFilter>("all");
+  const [search, setSearch] = useState("");
+
+  const filtered = learningPaths
+    .filter((p) => levelFilter === "all" || p.level === levelFilter)
+    .filter((p) => p.title.toLowerCase().includes(search.toLowerCase()) || p.tags.some((t) => t.toLowerCase().includes(search.toLowerCase())));
+
   return (
-    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
+    <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2">Learning Paths</h1>
         <p className="text-muted-foreground">Choose a domain and go from beginner to job-ready.</p>
       </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {learningPaths.map((path, i) => (
-          <motion.div
-            key={path.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-          >
-            <Card className="shadow-card hover:shadow-card-hover transition-all border-border group hover:-translate-y-0.5">
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div
-                    className="h-14 w-14 rounded-xl flex items-center justify-center text-2xl shrink-0"
-                    style={{ backgroundColor: `${path.color}20` }}
-                  >
-                    {path.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <h3 className="font-bold text-foreground text-lg">{path.title}</h3>
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground capitalize">
-                        {path.level}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-3">{path.description}</p>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
-                      <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{path.lessonsCount} lessons</span>
-                      <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{path.duration}</span>
-                    </div>
-                    <div className="flex flex-wrap gap-1 mb-4">
-                      {path.tags.map((tag) => (
-                        <span key={tag} className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">{tag}</span>
-                      ))}
-                    </div>
-                    {path.progress > 0 ? (
-                      <div className="space-y-2">
-                        <Progress value={path.progress} className="h-2" />
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs text-muted-foreground">{path.progress}% complete</span>
-                          <Link to="/courses/py-101">
-                            <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                              Continue <ArrowRight className="h-3 w-3 ml-1" />
-                            </Button>
-                          </Link>
-                        </div>
-                      </div>
-                    ) : (
-                      <Link to="/courses/py-101">
-                        <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                          Start Path <ArrowRight className="h-3 w-3 ml-1" />
-                        </Button>
-                      </Link>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1 max-w-sm">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search paths..."
+            className="w-full pl-9 pr-4 py-2 rounded-lg border border-border bg-background text-foreground placeholder:text-muted-foreground text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex gap-2">
+          {(["all", "beginner", "intermediate", "advanced"] as const).map((level) => (
+            <Button
+              key={level}
+              size="sm"
+              variant={levelFilter === level ? "default" : "outline"}
+              onClick={() => setLevelFilter(level)}
+              className={`capitalize ${levelFilter === level ? "bg-primary text-primary-foreground" : "border-border"}`}
+            >
+              {level === "all" ? "All Levels" : level}
+            </Button>
+          ))}
+        </div>
       </div>
+
+      {filtered.length === 0 ? (
+        <div className="text-center py-12 text-muted-foreground">No paths found matching your criteria.</div>
+      ) : (
+        <div className="grid gap-6 md:grid-cols-2">
+          {filtered.map((path, i) => (
+            <motion.div
+              key={path.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: i * 0.08 }}
+            >
+              <Card className="shadow-card hover:shadow-card-hover transition-all border-border group hover:-translate-y-0.5">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <div
+                      className="h-14 w-14 rounded-xl flex items-center justify-center text-2xl shrink-0"
+                      style={{ backgroundColor: `${path.color}20` }}
+                    >
+                      {path.icon}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-foreground text-lg">{path.title}</h3>
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-secondary text-secondary-foreground capitalize">
+                          {path.level}
+                        </span>
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-3">{path.description}</p>
+                      <div className="flex items-center gap-4 text-xs text-muted-foreground mb-4">
+                        <span className="flex items-center gap-1"><BookOpen className="h-3 w-3" />{path.lessonsCount} lessons</span>
+                        <span className="flex items-center gap-1"><Clock className="h-3 w-3" />{path.duration}</span>
+                      </div>
+                      <div className="flex flex-wrap gap-1 mb-4">
+                        {path.tags.map((tag) => (
+                          <span key={tag} className="text-xs bg-secondary text-secondary-foreground px-2 py-0.5 rounded-full">{tag}</span>
+                        ))}
+                      </div>
+                      {path.progress > 0 ? (
+                        <div className="space-y-2">
+                          <Progress value={path.progress} className="h-2" />
+                          <div className="flex items-center justify-between">
+                            <span className="text-xs text-muted-foreground">{path.progress}% complete</span>
+                            <Link to="/courses/py-101">
+                              <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                                Continue <ArrowRight className="h-3 w-3 ml-1" />
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ) : (
+                        <Link to="/courses/py-101">
+                          <Button size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                            Start Path <ArrowRight className="h-3 w-3 ml-1" />
+                          </Button>
+                        </Link>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
