@@ -1,10 +1,10 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, Flame, Trophy, TrendingUp, ArrowRight, Play } from "lucide-react";
+import { BookOpen, Flame, Trophy, TrendingUp, ArrowRight, Play, Zap, Target, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { learningPaths, userProfile, courses } from "@/data/mockData";
+import { learningPaths, userProfile } from "@/data/mockData";
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -12,9 +12,13 @@ const fadeIn = {
   transition: { duration: 0.4 },
 };
 
+const xpForNextLevel = (level: number) => level * 500;
+
 export default function Dashboard() {
   const activePaths = learningPaths.filter((p) => p.progress > 0);
   const recommended = learningPaths.filter((p) => p.progress === 0).slice(0, 3);
+  const currentLevelXP = userProfile.totalXP % xpForNextLevel(userProfile.level);
+  const nextLevelXP = xpForNextLevel(userProfile.level);
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
@@ -26,18 +30,35 @@ export default function Dashboard() {
         <p className="text-primary-foreground/80 mb-4">
           You're on a {userProfile.streak}-day streak. Keep it going!
         </p>
-        <div className="flex flex-wrap gap-4">
+        <div className="flex flex-wrap gap-3">
           <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-4 py-2">
             <Flame className="h-5 w-5 text-warning" />
-            <span className="font-semibold">{userProfile.streak} day streak</span>
+            <div>
+              <span className="font-semibold">{userProfile.streak} day streak</span>
+              <span className="text-primary-foreground/60 text-xs ml-1">(best: {userProfile.longestStreak})</span>
+            </div>
           </div>
           <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-4 py-2">
             <Trophy className="h-5 w-5 text-warning" />
             <span className="font-semibold">{userProfile.totalXP} XP</span>
           </div>
           <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-4 py-2">
+            <Zap className="h-5 w-5 text-warning" />
+            <span className="font-semibold">Level {userProfile.level}</span>
+          </div>
+          <div className="flex items-center gap-2 bg-primary-foreground/10 rounded-lg px-4 py-2">
             <BookOpen className="h-5 w-5" />
             <span className="font-semibold">{userProfile.coursesCompleted} courses</span>
+          </div>
+        </div>
+        {/* Level progress bar */}
+        <div className="mt-4 bg-primary-foreground/10 rounded-lg p-3">
+          <div className="flex items-center justify-between text-xs mb-1">
+            <span>Level {userProfile.level}</span>
+            <span>{currentLevelXP}/{nextLevelXP} XP to Level {userProfile.level + 1}</span>
+          </div>
+          <div className="h-2 bg-primary-foreground/20 rounded-full overflow-hidden">
+            <div className="h-full bg-accent rounded-full transition-all" style={{ width: `${(currentLevelXP / nextLevelXP) * 100}%` }} />
           </div>
         </div>
       </motion.div>
@@ -109,49 +130,30 @@ export default function Dashboard() {
         </div>
       </motion.section>
 
-      {/* Quick Stats */}
+      {/* Quick Actions */}
       <motion.section {...fadeIn} transition={{ delay: 0.3 }}>
         <h2 className="text-xl font-bold text-foreground mb-4">Quick Actions</h2>
-        <div className="grid gap-4 sm:grid-cols-3">
-          <Link to="/practice">
-            <Card className="shadow-card hover:shadow-card-hover transition-all border-border cursor-pointer group hover:-translate-y-0.5">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl gradient-accent flex items-center justify-center shrink-0">
-                  <TrendingUp className="h-6 w-6 text-accent-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Practice Now</h3>
-                  <p className="text-sm text-muted-foreground">Solve problems</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/projects">
-            <Card className="shadow-card hover:shadow-card-hover transition-all border-border cursor-pointer group hover:-translate-y-0.5">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl gradient-primary flex items-center justify-center shrink-0">
-                  <BookOpen className="h-6 w-6 text-primary-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">Build Projects</h3>
-                  <p className="text-sm text-muted-foreground">Hands-on learning</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/assistant">
-            <Card className="shadow-card hover:shadow-card-hover transition-all border-border cursor-pointer group hover:-translate-y-0.5">
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className="h-12 w-12 rounded-xl bg-info flex items-center justify-center shrink-0">
-                  <Flame className="h-6 w-6 text-info-foreground" />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-foreground">AI Assistant</h3>
-                  <p className="text-sm text-muted-foreground">Get help anytime</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {[
+            { title: "Practice Now", desc: "Solve problems", icon: Target, to: "/practice", gradient: "gradient-accent" },
+            { title: "Build Projects", desc: "Hands-on learning", icon: BookOpen, to: "/projects", gradient: "gradient-primary" },
+            { title: "AI Assistant", desc: "Get help anytime", icon: Flame, to: "/assistant", gradient: "bg-info" },
+            { title: "Analytics", desc: "Track progress", icon: BarChart3, to: "/analytics", gradient: "bg-warning" },
+          ].map((action) => (
+            <Link key={action.title} to={action.to}>
+              <Card className="shadow-card hover:shadow-card-hover transition-all border-border cursor-pointer group hover:-translate-y-0.5">
+                <CardContent className="p-5 flex items-center gap-4">
+                  <div className={`h-12 w-12 rounded-xl ${action.gradient} flex items-center justify-center shrink-0`}>
+                    <action.icon className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-foreground">{action.title}</h3>
+                    <p className="text-sm text-muted-foreground">{action.desc}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
         </div>
       </motion.section>
     </div>
