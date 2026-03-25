@@ -55,10 +55,17 @@ export interface UserProfile {
   email: string;
   avatar: string;
   streak: number;
+  longestStreak: number;
   totalXP: number;
+  level: number;
   coursesCompleted: number;
   badges: Badge[];
   skills: string[];
+  plan: "free" | "premium";
+  joinedDate: string;
+  totalMinutesLearned: number;
+  lessonsCompleted: number;
+  practicesSolved: number;
 }
 
 export interface Badge {
