@@ -1,5 +1,6 @@
 import { motion } from "framer-motion";
-import { Clock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Clock, ArrowRight, CheckCircle2, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +13,8 @@ const levelColor = {
 };
 
 export default function Projects() {
+  const navigate = useNavigate();
+
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -61,9 +64,21 @@ export default function Projects() {
                   </div>
                 </div>
 
-                <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90">
-                  Start Project <ArrowRight className="h-4 w-4 ml-1" />
-                </Button>
+                <div className="flex gap-2">
+                  <Button
+                    className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90"
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                  >
+                    Start Project <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="border-border"
+                    onClick={() => navigate(`/projects/${project.id}`)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           </motion.div>
