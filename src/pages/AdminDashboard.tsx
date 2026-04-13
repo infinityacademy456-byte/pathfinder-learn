@@ -2,8 +2,9 @@ import { useState } from "react";
 import { motion } from "framer-motion";
 import {
   Users, BookOpen, Shield, BarChart3, CheckCircle2, XCircle,
-  UserPlus, Trash2, Settings, TrendingUp, Eye
+  UserPlus, Trash2, Settings, TrendingUp, Eye, Upload
 } from "lucide-react";
+import PublishContent from "@/components/admin/PublishContent";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -126,6 +127,7 @@ export default function AdminDashboard() {
         <TabsList className="bg-secondary">
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="content">Content Approval</TabsTrigger>
+          <TabsTrigger value="publish" className="gap-1"><Upload className="h-3.5 w-3.5" />Publish Content</TabsTrigger>
           <TabsTrigger value="settings">Settings</TabsTrigger>
         </TabsList>
 
@@ -229,6 +231,11 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
           ))}
+        </TabsContent>
+
+        {/* Publish Content Tab */}
+        <TabsContent value="publish">
+          <PublishContent />
         </TabsContent>
 
         {/* Settings Tab */}
