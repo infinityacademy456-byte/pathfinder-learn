@@ -137,7 +137,7 @@ export default function Dashboard() {
           {[
             { title: "Practice Now", desc: "Solve problems", icon: Target, to: "/practice", gradient: "gradient-accent" },
             { title: "Build Projects", desc: "Hands-on learning", icon: BookOpen, to: "/projects", gradient: "gradient-primary" },
-            { title: "AI Assistant", desc: "Get help anytime", icon: Flame, to: "/assistant", gradient: "bg-info" },
+            { title: "Leaderboard", desc: "See rankings", icon: Flame, to: "/leaderboard", gradient: "bg-info" },
             { title: "Analytics", desc: "Track progress", icon: BarChart3, to: "/analytics", gradient: "bg-warning" },
           ].map((action) => (
             <Link key={action.title} to={action.to}>
