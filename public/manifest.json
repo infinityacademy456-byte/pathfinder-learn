@@ -1,0 +1,13 @@
+{
+  "name": "Pathfinder Learn",
+  "short_name": "Pathfinder",
+  "description": "Your AI-powered learning platform",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0f0e2e",
+  "theme_color": "#1a1654",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/favicon.ico", "sizes": "64x64", "type": "image/x-icon" }
+  ]
+}
