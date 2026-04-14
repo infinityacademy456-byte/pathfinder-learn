@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, FolderKanban, Zap, Flame, Play, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { BookOpen, CheckCircle2, FolderKanban, Zap, Flame, Play, Clock, AlertTriangle, CheckCircle, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { userProfile, courses, learningPaths } from "@/data/mockData";
+import { useCertificates } from "@/contexts/CertificateContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
