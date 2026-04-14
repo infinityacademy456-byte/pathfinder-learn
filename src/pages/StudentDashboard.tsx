@@ -41,6 +41,7 @@ const statusVariant: Record<string, "destructive" | "default" | "secondary"> = {
 
 export default function StudentDashboard() {
   const activeCourses = courses.filter(c => c.progress > 0);
+  const { certificates } = useCertificates();
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
@@ -70,6 +71,30 @@ export default function StudentDashboard() {
             </Card>
           ))}
         </div>
+      </motion.section>
+
+      {/* Certificates Widget */}
+      <motion.section {...fadeUp} transition={{ delay: 0.12 }}>
+        <Card className="shadow-card border-border">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+              <Award className="h-6 w-6 text-warning" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground">My Certificates</h3>
+              {certificates.length > 0 ? (
+                <p className="text-sm text-muted-foreground truncate">
+                  {certificates.length} earned — {certificates.slice(-2).map(c => c.courseTitle).join(", ")}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">No certificates yet</p>
+              )}
+            </div>
+            <Link to="/certificates">
+              <Button size="sm" variant="outline">View All</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </motion.section>
 
       {/* Continue Learning */}
