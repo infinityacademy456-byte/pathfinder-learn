@@ -9,10 +9,17 @@ import { Progress } from "@/components/ui/progress";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { courses } from "@/data/mockData";
+import { useCertificates } from "@/contexts/CertificateContext";
+
+const mentorMap: Record<string, string> = {
+  "py-101": "Dr. Anil Kumar",
+  "py-201": "Dr. Anil Kumar",
+};
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
   const course = courses.find((c) => c.id === courseId) ?? courses[0];
+  const { addCertificate, triggerCelebration } = useCertificates();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(
     new Set(course.lessons.map((l, i) => (l.completed ? i : -1)).filter((i) => i >= 0))
@@ -25,8 +32,16 @@ export default function CourseDetailPage() {
   const progress = Math.round((completed.size / course.lessons.length) * 100);
 
   const markComplete = () => {
-    setCompleted((prev) => new Set(prev).add(currentIdx));
+    const newCompleted = new Set(completed).add(currentIdx);
+    setCompleted(newCompleted);
     toast.success("Lesson marked as complete!");
+
+    // Check if all lessons are now completed
+    if (newCompleted.size === course.lessons.length) {
+      const mentor = mentorMap[course.id] || "Instructor";
+      addCertificate(course.title, mentor);
+      triggerCelebration(course.title);
+    }
   };
 
   const addNote = () => {

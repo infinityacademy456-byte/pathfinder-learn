@@ -1,11 +1,12 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, FolderKanban, Zap, Flame, Play, Clock, AlertTriangle, CheckCircle } from "lucide-react";
+import { BookOpen, CheckCircle2, FolderKanban, Zap, Flame, Play, Clock, AlertTriangle, CheckCircle, Award } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { userProfile, courses, learningPaths } from "@/data/mockData";
+import { useCertificates } from "@/contexts/CertificateContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -40,6 +41,7 @@ const statusVariant: Record<string, "destructive" | "default" | "secondary"> = {
 
 export default function StudentDashboard() {
   const activeCourses = courses.filter(c => c.progress > 0);
+  const { certificates } = useCertificates();
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
@@ -69,6 +71,30 @@ export default function StudentDashboard() {
             </Card>
           ))}
         </div>
+      </motion.section>
+
+      {/* Certificates Widget */}
+      <motion.section {...fadeUp} transition={{ delay: 0.12 }}>
+        <Card className="shadow-card border-border">
+          <CardContent className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
+              <Award className="h-6 w-6 text-warning" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-semibold text-foreground">My Certificates</h3>
+              {certificates.length > 0 ? (
+                <p className="text-sm text-muted-foreground truncate">
+                  {certificates.length} earned — {certificates.slice(-2).map(c => c.courseTitle).join(", ")}
+                </p>
+              ) : (
+                <p className="text-sm text-muted-foreground">No certificates yet</p>
+              )}
+            </div>
+            <Link to="/certificates">
+              <Button size="sm" variant="outline">View All</Button>
+            </Link>
+          </CardContent>
+        </Card>
       </motion.section>
 
       {/* Continue Learning */}

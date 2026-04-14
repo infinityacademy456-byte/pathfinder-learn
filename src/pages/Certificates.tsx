@@ -1,122 +1,127 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Award, Download, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Award, Download, Eye, Lock, Medal } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-
-const certificates = [
-  { id: "c1", course: "Python Fundamentals", date: "March 15, 2026", status: "earned" as const },
-  { id: "c2", course: "SQL Basics", date: "February 28, 2026", status: "earned" as const },
-  { id: "c3", course: "Data Visualization", date: "January 10, 2026", status: "earned" as const },
-  { id: "c4", course: "Machine Learning Intro", date: null, status: "in-progress" as const },
-];
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { useCertificates, EarnedCertificate } from "@/contexts/CertificateContext";
+import { learningPaths, userProfile } from "@/data/mockData";
 
 export default function Certificates() {
-  const handleDownload = (courseName: string) => {
-    // Generate a simple certificate
-    const canvas = document.createElement("canvas");
-    canvas.width = 1200;
-    canvas.height = 800;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Background
-    ctx.fillStyle = "#1e1b4b";
-    ctx.fillRect(0, 0, 1200, 800);
-    ctx.fillStyle = "#f8f8fc";
-    ctx.fillRect(30, 30, 1140, 740);
-
-    // Border
-    ctx.strokeStyle = "#1e1b4b";
-    ctx.lineWidth = 3;
-    ctx.strokeRect(50, 50, 1100, 700);
-
-    // Title
-    ctx.fillStyle = "#1e1b4b";
-    ctx.font = "bold 42px Georgia, serif";
-    ctx.textAlign = "center";
-    ctx.fillText("Certificate of Completion", 600, 180);
-
-    // Decorative line
-    ctx.strokeStyle = "#10b981";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(350, 200);
-    ctx.lineTo(850, 200);
-    ctx.stroke();
-
-    // Body
-    ctx.font = "20px Arial, sans-serif";
-    ctx.fillStyle = "#555";
-    ctx.fillText("This certifies that", 600, 290);
-
-    ctx.font = "bold 36px Georgia, serif";
-    ctx.fillStyle = "#1e1b4b";
-    ctx.fillText("Alex Chen", 600, 350);
-
-    ctx.font = "20px Arial, sans-serif";
-    ctx.fillStyle = "#555";
-    ctx.fillText("has successfully completed the course", 600, 420);
-
-    ctx.font = "bold 30px Georgia, serif";
-    ctx.fillStyle = "#10b981";
-    ctx.fillText(courseName, 600, 475);
-
-    ctx.font = "16px Arial, sans-serif";
-    ctx.fillStyle = "#888";
-    ctx.fillText("Infinity Learning Hub", 600, 560);
-
-    // Date
-    const cert = certificates.find((c) => c.course === courseName);
-    if (cert?.date) {
-      ctx.fillText(cert.date, 600, 600);
-    }
-
-    // Logo text
-    ctx.font = "bold 14px Arial, sans-serif";
-    ctx.fillStyle = "#1e1b4b";
-    ctx.fillText("∞ Infinity Learning", 600, 700);
-
-    const link = document.createElement("a");
-    link.download = `certificate-${courseName.replace(/\s+/g, "-").toLowerCase()}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  };
+  const { certificates } = useCertificates();
+  const [viewing, setViewing] = useState<EarnedCertificate | null>(null);
+  const inProgress = learningPaths.filter((p) => p.progress > 0 && p.progress < 100);
 
   return (
-    <div className="p-4 md:p-8 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="text-2xl md:text-3xl font-bold text-foreground mb-2 flex items-center gap-2">
-          <Award className="h-7 w-7 text-accent" /> Certificates
+        <h1 className="text-2xl md:text-3xl font-bold text-foreground flex items-center gap-2">
+          <Award className="h-7 w-7 text-warning" /> My Certificates
         </h1>
-        <p className="text-muted-foreground">Download certificates for completed courses.</p>
       </motion.div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {certificates.map((cert, i) => (
-          <motion.div key={cert.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.08 }}>
-            <Card className={`shadow-card border-border h-full ${cert.status === "in-progress" ? "opacity-60" : ""}`}>
-              <CardContent className="p-6">
-                <div className="flex items-start gap-4">
-                  <div className={`h-12 w-12 rounded-xl flex items-center justify-center shrink-0 ${cert.status === "earned" ? "gradient-accent" : "bg-secondary"}`}>
-                    <Award className={`h-6 w-6 ${cert.status === "earned" ? "text-accent-foreground" : "text-muted-foreground"}`} />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="font-semibold text-foreground">{cert.course}</h3>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {cert.status === "earned" ? `Completed ${cert.date}` : "In progress..."}
-                    </p>
-                    {cert.status === "earned" && (
-                      <Button size="sm" variant="outline" className="mt-3 border-border" onClick={() => handleDownload(cert.course)}>
+      <Tabs defaultValue="earned">
+        <TabsList>
+          <TabsTrigger value="earned">Earned ({certificates.length})</TabsTrigger>
+          <TabsTrigger value="progress">In Progress ({inProgress.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="earned" className="mt-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            {certificates.map((cert, i) => (
+              <motion.div key={cert.id} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.06 }}>
+                <Card className="shadow-card hover:shadow-card-hover transition-shadow border-border">
+                  <CardContent className="p-6 text-center space-y-3">
+                    <Medal className="h-10 w-10 text-warning mx-auto" />
+                    <h3 className="text-lg font-bold text-foreground">{cert.courseTitle}</h3>
+                    <p className="text-sm text-muted-foreground">Issued by Pathfinder Learn</p>
+                    <p className="text-xs text-muted-foreground">Completed {cert.completedDate}</p>
+                    <p className="font-mono text-xs text-muted-foreground">{cert.certificateId}</p>
+                    <div className="flex gap-2 justify-center pt-2">
+                      <Button size="sm" variant="outline" onClick={() => setViewing(cert)}>
+                        <Eye className="h-3 w-3 mr-1" /> View Certificate
+                      </Button>
+                      <Button size="sm" variant="outline" onClick={() => toast.success("Certificate downloaded!")}>
                         <Download className="h-3 w-3 mr-1" /> Download
                       </Button>
-                    )}
-                  </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+            {certificates.length === 0 && (
+              <p className="text-muted-foreground col-span-2 text-center py-12">No certificates earned yet. Complete a course to earn one!</p>
+            )}
+          </div>
+        </TabsContent>
+
+        <TabsContent value="progress" className="mt-4">
+          <div className="grid gap-4 md:grid-cols-2">
+            {inProgress.map((p) => {
+              const lessonsRemaining = Math.round(p.lessonsCount * (1 - p.progress / 100));
+              return (
+                <Card key={p.id} className="border-border">
+                  <CardContent className="p-5 space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Lock className="h-5 w-5 text-muted-foreground" />
+                      <h3 className="font-semibold text-foreground">{p.title}</h3>
+                    </div>
+                    <Progress value={p.progress} className="h-2" />
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs text-muted-foreground">{lessonsRemaining} lessons remaining</p>
+                      <Link to="/courses/py-101">
+                        <Button size="sm" variant="ghost" className="text-primary text-xs">Continue Course</Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        </TabsContent>
+      </Tabs>
+
+      {/* Certificate Dialog */}
+      <Dialog open={!!viewing} onOpenChange={() => setViewing(null)}>
+        <DialogContent className="max-w-lg sm:max-w-xl p-0 overflow-hidden">
+          <DialogHeader className="sr-only">
+            <DialogTitle>Certificate</DialogTitle>
+          </DialogHeader>
+          {viewing && (
+            <div className="m-4 border-[3px] border-warning rounded-xl overflow-hidden">
+              <div className="border border-warning m-2 rounded-lg p-6 md:p-8 text-center space-y-4" style={{ background: "hsl(45, 100%, 98%)" }}>
+                <p className="text-xl font-bold text-primary">Pathfinder Learn</p>
+                <div className="h-px bg-warning/40 mx-auto w-3/4" />
+                <p className="text-2xl md:text-3xl font-bold text-foreground">Certificate of Completion</p>
+                <p className="text-sm text-muted-foreground">This certifies that</p>
+                <p className="text-2xl md:text-3xl font-semibold text-primary">{userProfile.name}</p>
+                <p className="text-sm text-muted-foreground">has successfully completed</p>
+                <p className="text-xl font-bold text-foreground">{viewing.courseTitle}</p>
+                <p className="text-sm text-muted-foreground">Instructed by {viewing.mentorName}</p>
+                {/* Seal */}
+                <div className="mx-auto h-16 w-16 rounded-full border-2 border-warning flex items-center justify-center">
+                  <span className="text-warning font-bold text-sm">PFL</span>
                 </div>
-              </CardContent>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
+                <div className="flex justify-between text-xs text-muted-foreground px-2">
+                  <span>{viewing.completedDate}</span>
+                  <span className="font-mono">{viewing.certificateId}</span>
+                </div>
+              </div>
+            </div>
+          )}
+          <DialogFooter className="p-4 pt-0 gap-2">
+            <Button variant="outline" onClick={() => setViewing(null)}>Close</Button>
+            <Button onClick={() => toast.success("Certificate downloaded!")}>
+              <Download className="h-4 w-4 mr-1" /> Download
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
