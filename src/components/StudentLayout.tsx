@@ -8,9 +8,10 @@ import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { userProfile } from "@/data/mockData";
 import { CelebrationModal } from "@/components/CelebrationModal";
+import { useEnrollment } from "@/contexts/EnrollmentContext";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -33,7 +34,8 @@ const bottomNavItems = [
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const navigate = useNavigate();
   const location = useLocation();
-
+  const { currentStudentId, students } = useEnrollment();
+  const currentStudent = students.find(s => s.id === currentStudentId);
   const handleLogout = () => {
     localStorage.removeItem("userRole");
     navigate("/login");
@@ -78,10 +80,10 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
       <div className="p-3 border-t border-border">
         <div className="flex items-center gap-3 px-2 py-2">
           <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold shrink-0">
-            {userProfile.avatar}
+            {currentStudent?.avatar || "?"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-sm font-medium text-foreground truncate">{userProfile.name}</p>
+            <p className="text-sm font-medium text-foreground truncate">{currentStudent?.name || "Student"}</p>
             <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Student</Badge>
           </div>
           <Button variant="ghost" size="icon" onClick={handleLogout} className="text-muted-foreground shrink-0 h-8 w-8">
