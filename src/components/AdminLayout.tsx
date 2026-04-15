@@ -2,7 +2,7 @@ import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, Upload, BookOpen, Users, ClipboardList, Settings, LogOut, Shield, BarChart3, Menu
+  LayoutDashboard, Upload, BookOpen, Users, ClipboardList, Settings, LogOut, Shield, BarChart3, Menu, UserCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -14,6 +14,7 @@ const navItems = [
   { title: "Publish Content", url: "/admin/publish", icon: Upload },
   { title: "Manage Courses", url: "/admin/courses", icon: BookOpen },
   { title: "Manage Users", url: "/admin/users", icon: Users },
+  { title: "Enrollments", url: "/admin/enrollments", icon: UserCheck },
   { title: "Assessments", url: "/admin/assessments", icon: ClipboardList },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Settings },

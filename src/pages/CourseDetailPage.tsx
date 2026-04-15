@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Play, ChevronLeft, ChevronRight, CheckCircle, Menu, X, Send } from "lucide-react";
+import { Play, ChevronLeft, ChevronRight, CheckCircle, Menu, X, Send, Lock } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -10,6 +10,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { courses } from "@/data/mockData";
 import { useCertificates } from "@/contexts/CertificateContext";
+import { useEnrollment } from "@/contexts/EnrollmentContext";
 
 const mentorMap: Record<string, string> = {
   "py-101": "Dr. Anil Kumar",
@@ -18,8 +19,10 @@ const mentorMap: Record<string, string> = {
 
 export default function CourseDetailPage() {
   const { courseId } = useParams();
+  const navigate = useNavigate();
   const course = courses.find((c) => c.id === courseId) ?? courses[0];
   const { addCertificate, triggerCelebration } = useCertificates();
+  const { isEnrolled, currentStudentId, updateProgress, getStudentProgress } = useEnrollment();
   const [currentIdx, setCurrentIdx] = useState(0);
   const [completed, setCompleted] = useState<Set<number>>(
     new Set(course.lessons.map((l, i) => (l.completed ? i : -1)).filter((i) => i >= 0))
@@ -28,6 +31,25 @@ export default function CourseDetailPage() {
   const [notes, setNotes] = useState<string[]>([]);
   const [noteInput, setNoteInput] = useState("");
 
+  const enrolled = isEnrolled(currentStudentId, courseId || "");
+
+  if (!enrolled) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Card className="max-w-md w-full shadow-card border-border">
+          <CardContent className="p-8 text-center space-y-4">
+            <Lock className="h-12 w-12 text-muted-foreground mx-auto" />
+            <h2 className="text-xl font-bold text-foreground">Access Restricted</h2>
+            <p className="text-muted-foreground">You are not enrolled in this course. Please contact your admin to get access.</p>
+            <Link to="/courses">
+              <Button className="w-full">Back to My Courses</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const lesson = course.lessons[currentIdx];
   const progress = Math.round((completed.size / course.lessons.length) * 100);
 
@@ -35,6 +57,9 @@ export default function CourseDetailPage() {
     const newCompleted = new Set(completed).add(currentIdx);
     setCompleted(newCompleted);
     toast.success("Lesson marked as complete!");
+
+    // Update enrollment progress
+    updateProgress(currentStudentId, courseId || "", newCompleted.size);
 
     // Check if all lessons are now completed
     if (newCompleted.size === course.lessons.length) {

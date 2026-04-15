@@ -27,6 +27,7 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAssessments from "./pages/admin/AdminAssessments";
 import AdminSettings from "./pages/admin/AdminSettings";
+import ManageEnrollments from "./pages/admin/ManageEnrollments";
 import Analytics from "./pages/Analytics";
 
 import NotFound from "./pages/NotFound";
@@ -65,6 +66,7 @@ const App = () => (
               <Route path="/admin/publish" element={<AdminPublish />} />
               <Route path="/admin/courses" element={<AdminCourses />} />
               <Route path="/admin/users" element={<AdminUsers />} />
+              <Route path="/admin/enrollments" element={<ManageEnrollments />} />
               <Route path="/admin/assessments" element={<AdminAssessments />} />
               <Route path="/admin/analytics" element={<Analytics />} />
               <Route path="/admin/settings" element={<AdminSettings />} />

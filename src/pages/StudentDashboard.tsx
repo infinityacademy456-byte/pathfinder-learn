@@ -5,8 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { userProfile, courses, learningPaths } from "@/data/mockData";
 import { useCertificates } from "@/contexts/CertificateContext";
+import { useEnrollment } from "@/contexts/EnrollmentContext";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -14,23 +14,10 @@ const fadeUp = {
   transition: { duration: 0.4 },
 };
 
-const stats = [
-  { label: "Courses Enrolled", value: learningPaths.filter(p => p.progress > 0).length, icon: BookOpen, color: "text-primary" },
-  { label: "Lessons Completed", value: userProfile.lessonsCompleted, icon: CheckCircle2, color: "text-accent" },
-  { label: "Projects Done", value: 2, icon: FolderKanban, color: "hsl(var(--warning))" },
-  { label: "XP Points", value: userProfile.totalXP, icon: Zap, color: "hsl(var(--info))" },
-];
-
 const deadlines = [
   { task: "Submit Python Functions Quiz", due: "Apr 14, 2026", status: "Due Soon" as const },
   { task: "Complete Weather Dashboard Project", due: "Apr 10, 2026", status: "Overdue" as const },
   { task: "Finish SQL Joins Lesson", due: "Apr 20, 2026", status: "On Track" as const },
-];
-
-const recommended = [
-  { title: "Power BI Essentials", mentor: "Sarah Kim", level: "beginner" as const },
-  { title: "Deep Learning with PyTorch", mentor: "Dr. James Lee", level: "advanced" as const },
-  { title: "React & TypeScript", mentor: "Priya Sharma", level: "intermediate" as const },
 ];
 
 const statusVariant: Record<string, "destructive" | "default" | "secondary"> = {
@@ -40,16 +27,29 @@ const statusVariant: Record<string, "destructive" | "default" | "secondary"> = {
 };
 
 export default function StudentDashboard() {
-  const activeCourses = courses.filter(c => c.progress > 0);
   const { certificates } = useCertificates();
+  const { currentStudentId, getStudentEnrollments, students } = useEnrollment();
+  const myEnrollments = getStudentEnrollments(currentStudentId);
+  const currentStudent = students.find(s => s.id === currentStudentId);
+
+  const totalLessonsCompleted = myEnrollments.reduce((sum, e) => sum + e.lessonsCompleted, 0);
+  const completedCourses = myEnrollments.filter(e => e.status === "completed").length;
+  const activeCourses = myEnrollments.filter(e => e.status === "active");
+
+  const stats = [
+    { label: "Courses Enrolled", value: myEnrollments.length, icon: BookOpen, color: "text-primary" },
+    { label: "Lessons Completed", value: totalLessonsCompleted, icon: CheckCircle2, color: "text-accent" },
+    { label: "Courses Completed", value: completedCourses, icon: FolderKanban, color: "hsl(var(--warning))" },
+    { label: "Certificates Earned", value: completedCourses, icon: Award, color: "hsl(var(--info))" },
+  ];
 
   return (
     <div className="p-4 md:p-8 max-w-7xl mx-auto space-y-8">
       {/* Welcome */}
       <motion.div {...fadeUp} className="gradient-hero rounded-2xl p-6 md:p-8 text-primary-foreground">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, {userProfile.name}! 👋</h1>
+        <h1 className="text-2xl md:text-3xl font-bold mb-1">Welcome back, {currentStudent?.name || "Student"}! 👋</h1>
         <p className="text-primary-foreground/80 flex items-center gap-2">
-          <Flame className="h-5 w-5 text-warning" /> {userProfile.streak}-day streak — keep going!
+          <Flame className="h-5 w-5 text-warning" /> Keep up the great work!
         </p>
       </motion.div>
 
@@ -86,6 +86,8 @@ export default function StudentDashboard() {
                 <p className="text-sm text-muted-foreground truncate">
                   {certificates.length} earned — {certificates.slice(-2).map(c => c.courseTitle).join(", ")}
                 </p>
+              ) : completedCourses > 0 ? (
+                <p className="text-sm text-muted-foreground">{completedCourses} course{completedCourses > 1 ? "s" : ""} completed</p>
               ) : (
                 <p className="text-sm text-muted-foreground">No certificates yet</p>
               )}
@@ -100,25 +102,34 @@ export default function StudentDashboard() {
       {/* Continue Learning */}
       <motion.section {...fadeUp} transition={{ delay: 0.15 }}>
         <h2 className="text-xl font-bold text-foreground mb-4">Continue Learning</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {activeCourses.map((course) => (
-            <Card key={course.id} className="shadow-card hover:shadow-card-hover transition-shadow border-border">
-              <CardContent className="p-5 space-y-3">
-                <h3 className="font-semibold text-foreground">{course.title}</h3>
-                <Badge variant="secondary" className="capitalize">{course.level}</Badge>
-                <Progress value={course.progress} className="h-2" />
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-muted-foreground">{course.progress}% complete</span>
-                  <Link to={`/courses/${course.id}`}>
-                    <Button size="sm" variant="ghost" className="text-primary">
-                      <Play className="h-3 w-3 mr-1" /> Resume
-                    </Button>
-                  </Link>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        {activeCourses.length === 0 ? (
+          <Card className="shadow-card border-border">
+            <CardContent className="p-8 text-center">
+              <BookOpen className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
+              <p className="text-muted-foreground">No courses yet — your admin will assign courses to you soon</p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {activeCourses.map((enrollment) => (
+              <Card key={enrollment.id} className="shadow-card hover:shadow-card-hover transition-shadow border-border">
+                <CardContent className="p-5 space-y-3">
+                  <h3 className="font-semibold text-foreground">{enrollment.course.title}</h3>
+                  <Badge variant="secondary" className="capitalize">{enrollment.course.category}</Badge>
+                  <Progress value={enrollment.progress} className="h-2" />
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">{enrollment.progress}% complete</span>
+                    <Link to={`/courses/${enrollment.courseId}`}>
+                      <Button size="sm" variant="ghost" className="text-primary">
+                        <Play className="h-3 w-3 mr-1" /> Resume
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
       </motion.section>
 
       {/* Upcoming Deadlines */}
@@ -146,22 +157,6 @@ export default function StudentDashboard() {
             ))}
           </CardContent>
         </Card>
-      </motion.section>
-
-      {/* Recommended */}
-      <motion.section {...fadeUp} transition={{ delay: 0.25 }}>
-        <h2 className="text-xl font-bold text-foreground mb-4">Recommended for You</h2>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {recommended.map((r) => (
-            <Card key={r.title} className="shadow-card hover:shadow-card-hover transition-shadow border-border">
-              <CardContent className="p-5 space-y-2">
-                <h3 className="font-semibold text-foreground">{r.title}</h3>
-                <p className="text-sm text-muted-foreground">by {r.mentor}</p>
-                <Badge variant="outline" className="capitalize">{r.level}</Badge>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
       </motion.section>
     </div>
   );
