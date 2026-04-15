@@ -99,6 +99,8 @@ export function StudentLayout() {
   const isMobile = useIsMobile();
   const location = useLocation();
   const [sheetOpen, setSheetOpen] = useState(false);
+  const { currentStudentId, setCurrentStudentId, students } = useEnrollment();
+  const currentStudent = students.find(s => s.id === currentStudentId);
 
   return (
     <>
@@ -135,11 +137,25 @@ export function StudentLayout() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              {/* Demo mode switcher */}
+              <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">Demo Mode</Badge>
+              <Select value={currentStudentId} onValueChange={setCurrentStudentId}>
+                <SelectTrigger className="w-[140px] h-8 text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {students.map(s => (
+                    <SelectItem key={s.id} value={s.id} className="text-xs">
+                      {s.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <div className="flex items-center gap-2">
                 <div className="h-8 w-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-bold">
-                  {userProfile.avatar}
+                  {currentStudent?.avatar || "?"}
                 </div>
-                <span className="text-sm font-medium text-foreground hidden sm:inline">{userProfile.name}</span>
+                <span className="text-sm font-medium text-foreground hidden sm:inline">{currentStudent?.name || "Student"}</span>
               </div>
             </div>
           </header>
