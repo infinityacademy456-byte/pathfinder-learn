@@ -7,6 +7,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { StudentLayout } from "@/components/StudentLayout";
 import { AdminLayout } from "@/components/AdminLayout";
+import { MentorLayout } from "@/components/MentorLayout";
 import { CertificateProvider } from "@/contexts/CertificateContext";
 
 import Login from "./pages/Login";
@@ -20,6 +21,7 @@ import QuizPage from "./pages/QuizPage";
 import Leaderboard from "./pages/Leaderboard";
 import StudentProfile from "./pages/StudentProfile";
 import Certificates from "./pages/Certificates";
+import StudentMentorHub from "./pages/StudentMentorHub";
 
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminPublish from "./pages/admin/AdminPublish";
@@ -29,6 +31,16 @@ import AdminAssessments from "./pages/admin/AdminAssessments";
 import AdminSettings from "./pages/admin/AdminSettings";
 import ManageEnrollments from "./pages/admin/ManageEnrollments";
 import Analytics from "./pages/Analytics";
+
+import MentorDashboard from "./pages/mentor/MentorDashboard";
+import MentorBatches from "./pages/mentor/MentorBatches";
+import MentorClasses from "./pages/mentor/MentorClasses";
+import MentorMaterials from "./pages/mentor/MentorMaterials";
+import MentorTasks from "./pages/mentor/MentorTasks";
+import MentorEvaluations from "./pages/mentor/MentorEvaluations";
+import MentorProjects from "./pages/mentor/MentorProjects";
+import MentorAttendance from "./pages/mentor/MentorAttendance";
+import MentorQueries from "./pages/mentor/MentorQueries";
 
 import NotFound from "./pages/NotFound";
 
@@ -58,6 +70,20 @@ const App = () => (
               <Route path="/leaderboard" element={<Leaderboard />} />
               <Route path="/profile" element={<StudentProfile />} />
               <Route path="/certificates" element={<Certificates />} />
+              <Route path="/mentor-hub" element={<StudentMentorHub />} />
+            </Route>
+
+            {/* Mentor routes */}
+            <Route element={<ProtectedRoute role="mentor"><MentorLayout /></ProtectedRoute>}>
+              <Route path="/mentor" element={<MentorDashboard />} />
+              <Route path="/mentor/batches" element={<MentorBatches />} />
+              <Route path="/mentor/classes" element={<MentorClasses />} />
+              <Route path="/mentor/materials" element={<MentorMaterials />} />
+              <Route path="/mentor/tasks" element={<MentorTasks />} />
+              <Route path="/mentor/evaluations" element={<MentorEvaluations />} />
+              <Route path="/mentor/projects" element={<MentorProjects />} />
+              <Route path="/mentor/attendance" element={<MentorAttendance />} />
+              <Route path="/mentor/queries" element={<MentorQueries />} />
             </Route>
 
             {/* Admin routes */}

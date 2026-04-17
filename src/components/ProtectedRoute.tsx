@@ -1,18 +1,21 @@
-import { Navigate, useLocation } from "react-router-dom";
+import { Navigate } from "react-router-dom";
 
 interface ProtectedRouteProps {
-  role: "student" | "admin";
+  role: "student" | "admin" | "mentor";
   children: React.ReactNode;
 }
 
+const homeFor: Record<string, string> = {
+  student: "/dashboard",
+  admin: "/admin",
+  mentor: "/mentor",
+};
+
 export function ProtectedRoute({ role, children }: ProtectedRouteProps) {
-  const location = useLocation();
   const userRole = localStorage.getItem("userRole");
 
   if (!userRole) return <Navigate to="/login" replace />;
-
-  if (role === "student" && userRole !== "student") return <Navigate to="/admin" replace />;
-  if (role === "admin" && userRole !== "admin") return <Navigate to="/dashboard" replace />;
+  if (userRole !== role) return <Navigate to={homeFor[userRole] || "/login"} replace />;
 
   return <>{children}</>;
 }
