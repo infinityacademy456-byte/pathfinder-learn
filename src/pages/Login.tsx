@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GraduationCap, Shield, Infinity, Mail, Lock } from "lucide-react";
+import { GraduationCap, Shield, Infinity, Mail, Lock, UserCog } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 
-type Role = "student" | "admin";
+type Role = "student" | "admin" | "mentor";
+
+const homeFor: Record<Role, string> = { student: "/dashboard", admin: "/admin", mentor: "/mentor" };
 
 export default function Login() {
   const navigate = useNavigate();
@@ -21,12 +23,13 @@ export default function Login() {
     if (!email.trim() || !password.trim()) { toast.error("Please fill in all fields"); return; }
     localStorage.setItem("userRole", role);
     toast.success(`Logged in as ${role}`);
-    navigate(role === "student" ? "/dashboard" : "/admin");
+    navigate(homeFor[role]);
   };
 
   const roles: { value: Role; label: string; desc: string; icon: typeof GraduationCap }[] = [
-    { value: "student", label: "I am a Student", desc: "Access courses, projects & quizzes", icon: GraduationCap },
-    { value: "admin", label: "I am an Admin", desc: "Manage platform, users & content", icon: Shield },
+    { value: "student", label: "Student", desc: "Access your courses", icon: GraduationCap },
+    { value: "mentor", label: "Mentor", desc: "Teach & evaluate", icon: UserCog },
+    { value: "admin", label: "Admin", desc: "Manage platform", icon: Shield },
   ];
 
   return (
@@ -42,7 +45,7 @@ export default function Login() {
           <p className="text-sm text-muted-foreground">Sign in to continue</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-3 gap-2">
           {roles.map((r) => (
             <motion.div key={r.value} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Card
