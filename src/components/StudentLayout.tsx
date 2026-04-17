@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Home, BookOpen, FolderKanban, HelpCircle, Trophy, User, LogOut, GraduationCap, Award, Menu, X
+  Home, BookOpen, FolderKanban, HelpCircle, Trophy, User, LogOut, GraduationCap, Award, Menu, UserCog
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -12,10 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useIsMobile } from "@/hooks/use-mobile";
 import { CelebrationModal } from "@/components/CelebrationModal";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
+import { NotificationBell } from "@/components/NotificationBell";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "My Courses", url: "/courses", icon: BookOpen },
+  { title: "Mentor Hub", url: "/mentor-hub", icon: UserCog },
   { title: "Projects", url: "/projects", icon: FolderKanban },
   { title: "Quizzes", url: "/quizzes", icon: HelpCircle },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },
@@ -137,6 +139,7 @@ export function StudentLayout() {
               )}
             </div>
             <div className="flex items-center gap-3">
+              <NotificationBell />
               {/* Demo mode switcher */}
               <Badge variant="outline" className="bg-warning/10 text-warning border-warning/30 text-[10px]">Demo Mode</Badge>
               <Select value={currentStudentId} onValueChange={setCurrentStudentId}>
