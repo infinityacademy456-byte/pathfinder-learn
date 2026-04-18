@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
+import { useEnrollment } from "@/contexts/EnrollmentContext";
 
 type Role = "student" | "admin" | "mentor";
 
@@ -13,6 +14,7 @@ const homeFor: Record<Role, string> = { student: "/dashboard", admin: "/admin", 
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setCurrentStudentId, students } = useEnrollment();
   const [role, setRole] = useState<Role | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,8 +22,14 @@ export default function Login() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     if (!role) { toast.error("Please select a role"); return; }
-    if (!email.trim() || !password.trim()) { toast.error("Please fill in all fields"); return; }
+    if (!email.trim() || !password.trim()) { toast.error("Please enter your email and password"); return; }
+    if (password.length < 4) { toast.error("Password is too short"); return; }
     localStorage.setItem("userRole", role);
+    if (role === "student") {
+      // In demo mode, map known emails to seeded students; default to first student.
+      const matched = students.find(s => s.email.toLowerCase() === email.trim().toLowerCase());
+      setCurrentStudentId(matched?.id ?? students[0].id);
+    }
     toast.success(`Logged in as ${role}`);
     navigate(homeFor[role]);
   };
