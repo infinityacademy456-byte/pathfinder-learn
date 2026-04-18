@@ -1,7 +1,7 @@
 import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { motion } from "framer-motion";
 import {
-  Home, BookOpen, FolderKanban, HelpCircle, Trophy, User, LogOut, GraduationCap, Award, Menu, UserCog
+  Home, BookOpen, FolderKanban, HelpCircle, Trophy, User, LogOut, GraduationCap, Award, Menu, UserCog, ClipboardList
 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,7 @@ const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
   { title: "My Courses", url: "/courses", icon: BookOpen },
   { title: "Mentor Hub", url: "/mentor-hub", icon: UserCog },
+  { title: "Tasks", url: "/tasks", icon: ClipboardList },
   { title: "Projects", url: "/projects", icon: FolderKanban },
   { title: "Quizzes", url: "/quizzes", icon: HelpCircle },
   { title: "Leaderboard", url: "/leaderboard", icon: Trophy },

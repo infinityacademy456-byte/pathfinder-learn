@@ -22,6 +22,7 @@ import Leaderboard from "./pages/Leaderboard";
 import StudentProfile from "./pages/StudentProfile";
 import Certificates from "./pages/Certificates";
 import StudentMentorHub from "./pages/StudentMentorHub";
+import StudentTasks from "./pages/StudentTasks";
 
 import AdminOverview from "./pages/admin/AdminOverview";
 import AdminPublish from "./pages/admin/AdminPublish";
@@ -71,6 +72,7 @@ const App = () => (
               <Route path="/profile" element={<StudentProfile />} />
               <Route path="/certificates" element={<Certificates />} />
               <Route path="/mentor-hub" element={<StudentMentorHub />} />
+              <Route path="/tasks" element={<StudentTasks />} />
             </Route>
 
             {/* Mentor routes */}
