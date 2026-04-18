@@ -9,8 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CalendarClock, FileText, ClipboardList, MessageCircle, UserCheck2, Award, Plus, Send } from "lucide-react";
-import { useMentor } from "@/contexts/MentorContext";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { CalendarClock, FileText, ClipboardList, MessageCircle, UserCheck2, Award, Plus, Send, Play, ExternalLink } from "lucide-react";
+import { useMentor, type ClassSession } from "@/contexts/MentorContext";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { toast } from "sonner";
 
@@ -33,6 +34,7 @@ export default function StudentMentorHub() {
 
   const [open, setOpen] = useState(false);
   const [qForm, setQForm] = useState({ batchId: myBatches[0]?.id || "", subject: "", text: "" });
+  const [recording, setRecording] = useState<ClassSession | null>(null);
 
   const submitQuery = () => {
     if (!qForm.subject || !qForm.text || !qForm.batchId) { toast.error("Fill all fields"); return; }
@@ -71,26 +73,57 @@ export default function StudentMentorHub() {
 
         <TabsContent value="classes" className="mt-4 space-y-3">
           {myClasses.length === 0 && <p className="text-sm text-muted-foreground p-4">No scheduled classes</p>}
-          {myClasses.map(c => (
-            <Card key={c.id} className="shadow-card">
-              <CardContent className="p-4 flex items-start gap-3 flex-wrap">
-                <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                  <CalendarClock className="h-5 w-5 text-primary" />
-                </div>
-                <div className="flex-1 min-w-[200px]">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="font-semibold text-foreground">{c.title}</h3>
-                    <Badge variant={c.status === "scheduled" ? "default" : c.status === "completed" ? "secondary" : "destructive"}>{c.status}</Badge>
+          {myClasses.map(c => {
+            const batch = myBatches.find(b => b.id === c.batchId);
+            return (
+              <Card key={c.id} className="shadow-card">
+                <CardContent className="p-4 flex items-start gap-3 flex-wrap">
+                  <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+                    <CalendarClock className="h-5 w-5 text-primary" />
                   </div>
-                  <p className="text-xs text-muted-foreground">{new Date(c.scheduledAt).toLocaleString()} · {c.durationMin} min</p>
-                  <p className="text-sm text-foreground mt-1">{c.description}</p>
-                </div>
-                {c.status === "scheduled" && c.meetingLink && (
-                  <Button asChild><a href={c.meetingLink} target="_blank" rel="noreferrer">Join</a></Button>
-                )}
-              </CardContent>
-            </Card>
-          ))}
+                  <div className="flex-1 min-w-[200px]">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="font-semibold text-foreground">{c.title}</h3>
+                      <Badge variant={c.status === "scheduled" ? "default" : c.status === "completed" ? "secondary" : "destructive"}>{c.status}</Badge>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      {new Date(c.scheduledAt).toLocaleString()} · {c.durationMin} min
+                      {batch && ` · Mentor Smith`}
+                    </p>
+                    <p className="text-sm text-foreground mt-1">{c.description}</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2 shrink-0">
+                    {c.status === "scheduled" && c.meetingLink && (
+                      <Button asChild size="sm">
+                        <a href={c.meetingLink} target="_blank" rel="noreferrer">
+                          <ExternalLink className="h-3 w-3 mr-1" />Join Live
+                        </a>
+                      </Button>
+                    )}
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span tabIndex={c.recordingUrl ? -1 : 0}>
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              disabled={!c.recordingUrl}
+                              onClick={() => c.recordingUrl && setRecording(c)}
+                            >
+                              <Play className="h-3 w-3 mr-1" />Play Recording
+                            </Button>
+                          </span>
+                        </TooltipTrigger>
+                        {!c.recordingUrl && (
+                          <TooltipContent>Recording not available yet</TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
         </TabsContent>
 
         <TabsContent value="materials" className="mt-4 grid gap-3 md:grid-cols-2">
@@ -216,6 +249,20 @@ export default function StudentMentorHub() {
           ))}
         </TabsContent>
       </Tabs>
+
+      {/* Recording playback dialog */}
+      <Dialog open={!!recording} onOpenChange={o => !o && setRecording(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>{recording?.title} — Recording</DialogTitle>
+          </DialogHeader>
+          {recording?.recordingUrl && (
+            <video controls autoPlay className="w-full rounded-lg bg-black aspect-video" src={recording.recordingUrl}>
+              Your browser does not support video playback.
+            </video>
+          )}
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

@@ -25,6 +25,7 @@ export interface ClassSession {
   scheduledAt: string; // ISO datetime
   durationMin: number;
   meetingLink: string;
+  recordingUrl?: string;
   status: "scheduled" | "completed" | "cancelled";
 }
 
@@ -137,7 +138,7 @@ const isoDate = (offsetDays: number) => iso(offsetDays).split("T")[0];
 const initialClasses: ClassSession[] = [
   { id: "cls1", batchId: "b1", title: "Functions Deep Dive", description: "Lambda, closures, decorators", scheduledAt: iso(1, 14), durationMin: 60, meetingLink: "https://meet.example.com/python-1", status: "scheduled" },
   { id: "cls2", batchId: "b2", title: "Advanced Joins", description: "Inner, outer, self joins", scheduledAt: iso(2, 11), durationMin: 90, meetingLink: "https://meet.example.com/sql-1", status: "scheduled" },
-  { id: "cls3", batchId: "b3", title: "Pandas GroupBy", description: "Aggregation patterns", scheduledAt: iso(-3, 10), durationMin: 60, meetingLink: "https://meet.example.com/data-1", status: "completed" },
+  { id: "cls3", batchId: "b3", title: "Pandas GroupBy", description: "Aggregation patterns", scheduledAt: iso(-3, 10), durationMin: 60, meetingLink: "https://meet.example.com/data-1", recordingUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", status: "completed" },
   { id: "cls4", batchId: "b4", title: "Linear Regression", description: "Theory + sklearn", scheduledAt: iso(3, 16), durationMin: 75, meetingLink: "https://meet.example.com/ml-1", status: "scheduled" },
 ];
 
