@@ -416,6 +416,31 @@ export function MentorProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   }, []);
 
+  // ===== Student-side writes =====
+  const submitTask = useCallback<MentorContextType["submitTask"]>((taskId, studentId, content) => {
+    setSubmissions(prev => {
+      const existing = prev.find(s => s.taskId === taskId && s.studentId === studentId);
+      if (existing) {
+        return prev.map(s => s === existing ? { ...s, content, submittedAt: new Date().toISOString() } : s);
+      }
+      return [...prev, {
+        id: `sub${Date.now()}`,
+        taskId, studentId, content,
+        submittedAt: new Date().toISOString(),
+        marks: null, feedback: "", status: "pending" as const,
+      }];
+    });
+  }, []);
+
+  const submitProject = useCallback<MentorContextType["submitProject"]>((studentId, batchId, title, url) => {
+    setProjects(prev => [...prev, {
+      id: `pr${Date.now()}`,
+      studentId, batchId, title, url,
+      submittedAt: new Date().toISOString(),
+      status: "pending" as const, score: null, feedback: "",
+    }]);
+  }, []);
+
   // ===== Selectors =====
   const getStudentBatches = useCallback((studentId: string) =>
     batches.filter(b => b.studentIds.includes(studentId)), [batches]);
@@ -447,6 +472,9 @@ export function MentorProvider({ children }: { children: ReactNode }) {
   const getStudentQueries = useCallback((studentId: string) =>
     queries.filter(q => q.studentId === studentId), [queries]);
 
+  const getStudentProjects = useCallback((studentId: string) =>
+    projects.filter(p => p.studentId === studentId), [projects]);
+
   const value = useMemo<MentorContextType>(() => ({
     mentors, currentMentorId, batches, classes, materials, tasks, submissions,
     projects, attendance, queries, notifications, auditLog,
@@ -457,12 +485,14 @@ export function MentorProvider({ children }: { children: ReactNode }) {
     markAttendance,
     replyToQuery, resolveQuery, raiseQuery,
     markNotificationRead,
+    submitTask, submitProject,
     getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
-    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries,
+    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries, getStudentProjects,
   }), [batches, classes, materials, tasks, submissions, projects, attendance, queries, notifications, auditLog,
     scheduleClass, updateClass, cancelClass, uploadMaterial, deleteMaterial, createTask, deleteTask,
     evaluateSubmission, reviewProject, markAttendance, replyToQuery, resolveQuery, raiseQuery,
-    markNotificationRead, getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
+    markNotificationRead, submitTask, submitProject,
+    getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
     getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries]);
 
   return <MentorContext.Provider value={value}>{children}</MentorContext.Provider>;
