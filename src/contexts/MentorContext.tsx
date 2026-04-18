@@ -228,6 +228,10 @@ interface MentorContextType {
   // Notifications
   markNotificationRead: (id: string) => void;
 
+  // Student-side writes
+  submitTask: (taskId: string, studentId: string, content: string) => void;
+  submitProject: (studentId: string, batchId: string, title: string, url: string) => void;
+
   // Selectors for student side
   getStudentBatches: (studentId: string) => Batch[];
   getStudentClasses: (studentId: string) => ClassSession[];
@@ -237,21 +241,22 @@ interface MentorContextType {
   getStudentAttendance: (studentId: string) => (AttendanceRecord & { class: ClassSession | undefined })[];
   getStudentNotifications: (studentId: string) => Notification[];
   getStudentQueries: (studentId: string) => Query[];
+  getStudentProjects: (studentId: string) => ProjectReview[];
 }
 
 const MentorContext = createContext<MentorContextType | null>(null);
 
 export function MentorProvider({ children }: { children: ReactNode }) {
   const [batches] = useState<Batch[]>(initialBatches);
-  const [classes, setClasses] = useState<ClassSession[]>(initialClasses);
-  const [materials, setMaterials] = useState<Material[]>(initialMaterials);
-  const [tasks, setTasks] = useState<MentorTask[]>(initialTasks);
-  const [submissions, setSubmissions] = useState<Submission[]>(initialSubmissions);
-  const [projects, setProjects] = useState<ProjectReview[]>(initialProjects);
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
-  const [queries, setQueries] = useState<Query[]>(initialQueries);
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
-  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [classes, setClasses] = usePersistedState<ClassSession[]>("ilh.mentor.classes", initialClasses);
+  const [materials, setMaterials] = usePersistedState<Material[]>("ilh.mentor.materials", initialMaterials);
+  const [tasks, setTasks] = usePersistedState<MentorTask[]>("ilh.mentor.tasks", initialTasks);
+  const [submissions, setSubmissions] = usePersistedState<Submission[]>("ilh.mentor.submissions", initialSubmissions);
+  const [projects, setProjects] = usePersistedState<ProjectReview[]>("ilh.mentor.projects", initialProjects);
+  const [attendance, setAttendance] = usePersistedState<AttendanceRecord[]>("ilh.mentor.attendance", initialAttendance);
+  const [queries, setQueries] = usePersistedState<Query[]>("ilh.mentor.queries", initialQueries);
+  const [notifications, setNotifications] = usePersistedState<Notification[]>("ilh.mentor.notifications", initialNotifications);
+  const [auditLog, setAuditLog] = usePersistedState<AuditEntry[]>("ilh.mentor.audit", []);
   const currentMentorId = "m1";
 
   const log = useCallback((action: string, target: string) => {
