@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode } from "react";
+import { usePersistedState } from "@/lib/use-persisted-state";
 
 // ============== TYPES ==============
 export interface Mentor {
@@ -24,6 +25,7 @@ export interface ClassSession {
   scheduledAt: string; // ISO datetime
   durationMin: number;
   meetingLink: string;
+  recordingUrl?: string;
   status: "scheduled" | "completed" | "cancelled";
 }
 
@@ -136,7 +138,7 @@ const isoDate = (offsetDays: number) => iso(offsetDays).split("T")[0];
 const initialClasses: ClassSession[] = [
   { id: "cls1", batchId: "b1", title: "Functions Deep Dive", description: "Lambda, closures, decorators", scheduledAt: iso(1, 14), durationMin: 60, meetingLink: "https://meet.example.com/python-1", status: "scheduled" },
   { id: "cls2", batchId: "b2", title: "Advanced Joins", description: "Inner, outer, self joins", scheduledAt: iso(2, 11), durationMin: 90, meetingLink: "https://meet.example.com/sql-1", status: "scheduled" },
-  { id: "cls3", batchId: "b3", title: "Pandas GroupBy", description: "Aggregation patterns", scheduledAt: iso(-3, 10), durationMin: 60, meetingLink: "https://meet.example.com/data-1", status: "completed" },
+  { id: "cls3", batchId: "b3", title: "Pandas GroupBy", description: "Aggregation patterns", scheduledAt: iso(-3, 10), durationMin: 60, meetingLink: "https://meet.example.com/data-1", recordingUrl: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4", status: "completed" },
   { id: "cls4", batchId: "b4", title: "Linear Regression", description: "Theory + sklearn", scheduledAt: iso(3, 16), durationMin: 75, meetingLink: "https://meet.example.com/ml-1", status: "scheduled" },
 ];
 
@@ -227,6 +229,10 @@ interface MentorContextType {
   // Notifications
   markNotificationRead: (id: string) => void;
 
+  // Student-side writes
+  submitTask: (taskId: string, studentId: string, content: string) => void;
+  submitProject: (studentId: string, batchId: string, title: string, url: string) => void;
+
   // Selectors for student side
   getStudentBatches: (studentId: string) => Batch[];
   getStudentClasses: (studentId: string) => ClassSession[];
@@ -236,21 +242,22 @@ interface MentorContextType {
   getStudentAttendance: (studentId: string) => (AttendanceRecord & { class: ClassSession | undefined })[];
   getStudentNotifications: (studentId: string) => Notification[];
   getStudentQueries: (studentId: string) => Query[];
+  getStudentProjects: (studentId: string) => ProjectReview[];
 }
 
 const MentorContext = createContext<MentorContextType | null>(null);
 
 export function MentorProvider({ children }: { children: ReactNode }) {
   const [batches] = useState<Batch[]>(initialBatches);
-  const [classes, setClasses] = useState<ClassSession[]>(initialClasses);
-  const [materials, setMaterials] = useState<Material[]>(initialMaterials);
-  const [tasks, setTasks] = useState<MentorTask[]>(initialTasks);
-  const [submissions, setSubmissions] = useState<Submission[]>(initialSubmissions);
-  const [projects, setProjects] = useState<ProjectReview[]>(initialProjects);
-  const [attendance, setAttendance] = useState<AttendanceRecord[]>(initialAttendance);
-  const [queries, setQueries] = useState<Query[]>(initialQueries);
-  const [notifications, setNotifications] = useState<Notification[]>(initialNotifications);
-  const [auditLog, setAuditLog] = useState<AuditEntry[]>([]);
+  const [classes, setClasses] = usePersistedState<ClassSession[]>("ilh.mentor.classes", initialClasses);
+  const [materials, setMaterials] = usePersistedState<Material[]>("ilh.mentor.materials", initialMaterials);
+  const [tasks, setTasks] = usePersistedState<MentorTask[]>("ilh.mentor.tasks", initialTasks);
+  const [submissions, setSubmissions] = usePersistedState<Submission[]>("ilh.mentor.submissions", initialSubmissions);
+  const [projects, setProjects] = usePersistedState<ProjectReview[]>("ilh.mentor.projects", initialProjects);
+  const [attendance, setAttendance] = usePersistedState<AttendanceRecord[]>("ilh.mentor.attendance", initialAttendance);
+  const [queries, setQueries] = usePersistedState<Query[]>("ilh.mentor.queries", initialQueries);
+  const [notifications, setNotifications] = usePersistedState<Notification[]>("ilh.mentor.notifications", initialNotifications);
+  const [auditLog, setAuditLog] = usePersistedState<AuditEntry[]>("ilh.mentor.audit", []);
   const currentMentorId = "m1";
 
   const log = useCallback((action: string, target: string) => {
@@ -410,6 +417,31 @@ export function MentorProvider({ children }: { children: ReactNode }) {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
   }, []);
 
+  // ===== Student-side writes =====
+  const submitTask = useCallback<MentorContextType["submitTask"]>((taskId, studentId, content) => {
+    setSubmissions(prev => {
+      const existing = prev.find(s => s.taskId === taskId && s.studentId === studentId);
+      if (existing) {
+        return prev.map(s => s === existing ? { ...s, content, submittedAt: new Date().toISOString() } : s);
+      }
+      return [...prev, {
+        id: `sub${Date.now()}`,
+        taskId, studentId, content,
+        submittedAt: new Date().toISOString(),
+        marks: null, feedback: "", status: "pending" as const,
+      }];
+    });
+  }, []);
+
+  const submitProject = useCallback<MentorContextType["submitProject"]>((studentId, batchId, title, url) => {
+    setProjects(prev => [...prev, {
+      id: `pr${Date.now()}`,
+      studentId, batchId, title, url,
+      submittedAt: new Date().toISOString(),
+      status: "pending" as const, score: null, feedback: "",
+    }]);
+  }, []);
+
   // ===== Selectors =====
   const getStudentBatches = useCallback((studentId: string) =>
     batches.filter(b => b.studentIds.includes(studentId)), [batches]);
@@ -441,6 +473,9 @@ export function MentorProvider({ children }: { children: ReactNode }) {
   const getStudentQueries = useCallback((studentId: string) =>
     queries.filter(q => q.studentId === studentId), [queries]);
 
+  const getStudentProjects = useCallback((studentId: string) =>
+    projects.filter(p => p.studentId === studentId), [projects]);
+
   const value = useMemo<MentorContextType>(() => ({
     mentors, currentMentorId, batches, classes, materials, tasks, submissions,
     projects, attendance, queries, notifications, auditLog,
@@ -451,13 +486,15 @@ export function MentorProvider({ children }: { children: ReactNode }) {
     markAttendance,
     replyToQuery, resolveQuery, raiseQuery,
     markNotificationRead,
+    submitTask, submitProject,
     getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
-    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries,
+    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries, getStudentProjects,
   }), [batches, classes, materials, tasks, submissions, projects, attendance, queries, notifications, auditLog,
     scheduleClass, updateClass, cancelClass, uploadMaterial, deleteMaterial, createTask, deleteTask,
     evaluateSubmission, reviewProject, markAttendance, replyToQuery, resolveQuery, raiseQuery,
-    markNotificationRead, getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
-    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries]);
+    markNotificationRead, submitTask, submitProject,
+    getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
+    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries, getStudentProjects]);
 
   return <MentorContext.Provider value={value}>{children}</MentorContext.Provider>;
 }

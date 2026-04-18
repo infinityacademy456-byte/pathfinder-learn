@@ -1,12 +1,14 @@
 import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
-import { BookOpen, CheckCircle2, FolderKanban, Zap, Flame, Play, Clock, AlertTriangle, CheckCircle, Award } from "lucide-react";
+import { BookOpen, CheckCircle2, FolderKanban, Flame, Play, Clock, AlertTriangle, CheckCircle, Award, Target, ClipboardList } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { useCertificates } from "@/contexts/CertificateContext";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
+import { useMentor } from "@/contexts/MentorContext";
+import { AttendanceCalendar } from "@/components/AttendanceCalendar";
 
 const fadeUp = {
   initial: { opacity: 0, y: 20 },
@@ -29,18 +31,31 @@ const statusVariant: Record<string, "destructive" | "default" | "secondary"> = {
 export default function StudentDashboard() {
   const { certificates } = useCertificates();
   const { currentStudentId, getStudentEnrollments, students } = useEnrollment();
+  const { getStudentTasks, getStudentSubmissions } = useMentor();
+
   const myEnrollments = getStudentEnrollments(currentStudentId);
   const currentStudent = students.find(s => s.id === currentStudentId);
+  const myTasks = getStudentTasks(currentStudentId);
+  const mySubs = getStudentSubmissions(currentStudentId);
 
   const totalLessonsCompleted = myEnrollments.reduce((sum, e) => sum + e.lessonsCompleted, 0);
   const completedCourses = myEnrollments.filter(e => e.status === "completed").length;
+  const ongoingCourses = myEnrollments.filter(e => e.status === "active" && e.progress > 0).length;
+  const notStartedCourses = myEnrollments.filter(e => e.progress === 0).length;
   const activeCourses = myEnrollments.filter(e => e.status === "active");
 
+  // Task & quiz performance
+  const submissionRate = myTasks.length ? Math.round((mySubs.length / myTasks.length) * 100) : 0;
+  const reviewedSubs = mySubs.filter(s => s.marks != null);
+  const avgScore = reviewedSubs.length
+    ? Math.round(reviewedSubs.reduce((sum, s) => sum + (s.marks ?? 0), 0) / reviewedSubs.length)
+    : 0;
+
   const stats = [
-    { label: "Courses Enrolled", value: myEnrollments.length, icon: BookOpen, color: "text-primary" },
-    { label: "Lessons Completed", value: totalLessonsCompleted, icon: CheckCircle2, color: "text-accent" },
-    { label: "Courses Completed", value: completedCourses, icon: FolderKanban, color: "hsl(var(--warning))" },
-    { label: "Certificates Earned", value: completedCourses, icon: Award, color: "hsl(var(--info))" },
+    { label: "Courses Enrolled", value: myEnrollments.length, icon: BookOpen },
+    { label: "Ongoing", value: ongoingCourses, icon: Play },
+    { label: "Completed", value: completedCourses, icon: CheckCircle2 },
+    { label: "Certificates", value: completedCourses, icon: Award },
   ];
 
   return (
@@ -61,7 +76,7 @@ export default function StudentDashboard() {
             <Card key={s.label} className="shadow-card border-border">
               <CardContent className="p-5 flex items-center gap-4">
                 <div className="h-11 w-11 rounded-xl bg-secondary flex items-center justify-center shrink-0">
-                  <s.icon className="h-5 w-5" style={{ color: s.color.startsWith("hsl") ? s.color : undefined }} />
+                  <s.icon className="h-5 w-5 text-primary" />
                 </div>
                 <div>
                   <p className="text-2xl font-bold text-foreground">{s.value}</p>
@@ -73,8 +88,56 @@ export default function StudentDashboard() {
         </div>
       </motion.section>
 
+      {/* Attendance + Performance */}
+      <motion.section {...fadeUp} transition={{ delay: 0.12 }} className="grid gap-4 lg:grid-cols-2">
+        <AttendanceCalendar />
+
+        <Card className="shadow-card border-border">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-base flex items-center gap-2">
+              <Target className="h-4 w-4 text-primary" /> Task & Quiz Performance
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div>
+              <div className="flex justify-between text-xs mb-1.5">
+                <span className="text-muted-foreground">Tasks submitted</span>
+                <span className="font-medium text-foreground">{mySubs.length} / {myTasks.length}</span>
+              </div>
+              <Progress value={submissionRate} className="h-2" />
+            </div>
+            <div>
+              <div className="flex justify-between text-xs mb-1.5">
+                <span className="text-muted-foreground">Average score (reviewed)</span>
+                <span className="font-medium text-foreground">{avgScore}/100</span>
+              </div>
+              <Progress value={avgScore} className="h-2" />
+            </div>
+            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-border">
+              <div className="text-center">
+                <p className="text-lg font-bold text-foreground">{notStartedCourses}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Not Started</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-primary">{ongoingCourses}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Ongoing</p>
+              </div>
+              <div className="text-center">
+                <p className="text-lg font-bold text-accent">{completedCourses}</p>
+                <p className="text-[10px] uppercase text-muted-foreground">Completed</p>
+              </div>
+            </div>
+            <Link to="/tasks">
+              <Button size="sm" variant="outline" className="w-full">
+                <ClipboardList className="h-4 w-4 mr-1" /> View all tasks
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </motion.section>
+
       {/* Certificates Widget */}
-      <motion.section {...fadeUp} transition={{ delay: 0.12 }}>
+      <motion.section {...fadeUp} transition={{ delay: 0.14 }}>
         <Card className="shadow-card border-border">
           <CardContent className="p-5 flex items-center gap-4">
             <div className="h-12 w-12 rounded-xl bg-warning/10 flex items-center justify-center shrink-0">
@@ -100,7 +163,7 @@ export default function StudentDashboard() {
       </motion.section>
 
       {/* Continue Learning */}
-      <motion.section {...fadeUp} transition={{ delay: 0.15 }}>
+      <motion.section {...fadeUp} transition={{ delay: 0.16 }}>
         <h2 className="text-xl font-bold text-foreground mb-4">Continue Learning</h2>
         {activeCourses.length === 0 ? (
           <Card className="shadow-card border-border">

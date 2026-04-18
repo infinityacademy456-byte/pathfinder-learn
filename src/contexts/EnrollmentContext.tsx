@@ -1,4 +1,5 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react";
+import { createContext, useContext, useCallback, type ReactNode } from "react";
+import { usePersistedState } from "@/lib/use-persisted-state";
 
 export interface Student {
   id: string;
@@ -68,8 +69,8 @@ interface EnrollmentContextType {
 const EnrollmentContext = createContext<EnrollmentContextType | null>(null);
 
 export function EnrollmentProvider({ children }: { children: ReactNode }) {
-  const [enrollments, setEnrollments] = useState<Enrollment[]>(initialEnrollments);
-  const [currentStudentId, setCurrentStudentId] = useState("s1");
+  const [enrollments, setEnrollments] = usePersistedState<Enrollment[]>("ilh.enrollments", initialEnrollments);
+  const [currentStudentId, setCurrentStudentId] = usePersistedState<string>("ilh.currentStudentId", "s1");
 
   const enrollStudent = useCallback((studentId: string, courseId: string) => {
     setEnrollments(prev => {
