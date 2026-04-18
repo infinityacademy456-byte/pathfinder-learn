@@ -493,7 +493,7 @@ export function MentorProvider({ children }: { children: ReactNode }) {
     evaluateSubmission, reviewProject, markAttendance, replyToQuery, resolveQuery, raiseQuery,
     markNotificationRead, submitTask, submitProject,
     getStudentBatches, getStudentClasses, getStudentMaterials, getStudentTasks,
-    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries]);
+    getStudentSubmissions, getStudentAttendance, getStudentNotifications, getStudentQueries, getStudentProjects]);
 
   return <MentorContext.Provider value={value}>{children}</MentorContext.Provider>;
 }
