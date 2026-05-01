@@ -2,7 +2,7 @@ import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, Upload, BookOpen, Users, ClipboardList, Settings, LogOut, Shield, BarChart3, Menu, UserCheck
+  LayoutDashboard, Upload, BookOpen, Users, ClipboardList, Settings, LogOut, Shield, BarChart3, Menu, UserCheck, Layers, Award, Activity
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
