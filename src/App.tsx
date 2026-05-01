@@ -30,6 +30,9 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAssessments from "./pages/admin/AdminAssessments";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminBatches from "./pages/admin/AdminBatches";
+import AdminCertificates from "./pages/admin/AdminCertificates";
+import AdminActivityLog from "./pages/admin/AdminActivityLog";
 import ManageEnrollments from "./pages/admin/ManageEnrollments";
 import Analytics from "./pages/Analytics";
 
@@ -95,8 +98,11 @@ const App = () => (
               <Route path="/admin/courses" element={<AdminCourses />} />
               <Route path="/admin/users" element={<AdminUsers />} />
               <Route path="/admin/enrollments" element={<ManageEnrollments />} />
+              <Route path="/admin/batches" element={<AdminBatches />} />
               <Route path="/admin/assessments" element={<AdminAssessments />} />
+              <Route path="/admin/certificates" element={<AdminCertificates />} />
               <Route path="/admin/analytics" element={<Analytics />} />
+              <Route path="/admin/activity" element={<AdminActivityLog />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
             </Route>
 
