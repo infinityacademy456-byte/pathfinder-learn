@@ -30,6 +30,9 @@ import AdminCourses from "./pages/admin/AdminCourses";
 import AdminUsers from "./pages/admin/AdminUsers";
 import AdminAssessments from "./pages/admin/AdminAssessments";
 import AdminSettings from "./pages/admin/AdminSettings";
+import AdminBatches from "./pages/admin/AdminBatches";
+import AdminCertificates from "./pages/admin/AdminCertificates";
+import AdminActivityLog from "./pages/admin/AdminActivityLog";
 import ManageEnrollments from "./pages/admin/ManageEnrollments";
 import Analytics from "./pages/Analytics";
 
