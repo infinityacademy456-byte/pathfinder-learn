@@ -15,8 +15,11 @@ const navItems = [
   { title: "Manage Courses", url: "/admin/courses", icon: BookOpen },
   { title: "Manage Users", url: "/admin/users", icon: Users },
   { title: "Enrollments", url: "/admin/enrollments", icon: UserCheck },
+  { title: "Batches", url: "/admin/batches", icon: Layers },
   { title: "Assessments", url: "/admin/assessments", icon: ClipboardList },
+  { title: "Certificates", url: "/admin/certificates", icon: Award },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
+  { title: "Activity Log", url: "/admin/activity", icon: Activity },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
