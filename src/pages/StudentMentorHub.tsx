@@ -14,6 +14,7 @@ import { CalendarClock, FileText, ClipboardList, MessageCircle, UserCheck2, Awar
 import { useMentor, type ClassSession } from "@/contexts/MentorContext";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { toast } from "sonner";
+import { safeHref } from "@/lib/safe-url";
 
 export default function StudentMentorHub() {
   const { currentStudentId } = useEnrollment();
@@ -93,9 +94,9 @@ export default function StudentMentorHub() {
                     <p className="text-sm text-foreground mt-1">{c.description}</p>
                   </div>
                   <div className="flex flex-wrap gap-2 shrink-0">
-                    {c.status === "scheduled" && c.meetingLink && (
+                    {c.status === "scheduled" && safeHref(c.meetingLink) && (
                       <Button asChild size="sm">
-                        <a href={c.meetingLink} target="_blank" rel="noreferrer">
+                        <a href={safeHref(c.meetingLink)} target="_blank" rel="noopener noreferrer">
                           <ExternalLink className="h-3 w-3 mr-1" />Join Live
                         </a>
                       </Button>
