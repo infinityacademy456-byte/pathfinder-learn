@@ -14,8 +14,8 @@ export default function AdminSettings() {
       <Card className="shadow-card border-border">
         <CardContent className="p-6 space-y-4">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div><label className="text-xs text-muted-foreground">Platform Name</label><Input defaultValue="Infinity Learning Hub" /></div>
-            <div><label className="text-xs text-muted-foreground">Support Email</label><Input defaultValue="support@infinitylearning.com" /></div>
+            <div><label className="text-xs text-muted-foreground">Platform Name</label><Input defaultValue="Vidya Learning Hub" /></div>
+            <div><label className="text-xs text-muted-foreground">Support Email</label><Input defaultValue="support@vidyalearning.com" /></div>
             <div><label className="text-xs text-muted-foreground">Max Free Courses</label><Input type="number" defaultValue="3" /></div>
             <div><label className="text-xs text-muted-foreground">Premium Price ($/month)</label><Input type="number" defaultValue="19" /></div>
           </div>

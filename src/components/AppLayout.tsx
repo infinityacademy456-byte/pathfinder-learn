@@ -3,6 +3,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { FloatingChat } from "@/components/FloatingChat";
 import { GlobalSearch } from "@/components/GlobalSearch";
 import { Infinity } from "lucide-react";
+import { BRAND } from "@/lib/branding";
 
 interface AppLayoutProps {
   children: React.ReactNode;
@@ -18,7 +19,7 @@ export function AppLayout({ children }: AppLayoutProps) {
             <SidebarTrigger className="mr-2" />
             <div className="flex items-center gap-2 md:hidden">
               <Infinity className="h-5 w-5 text-primary" />
-              <span className="font-bold text-sm text-foreground">Infinity Learning</span>
+              <span className="font-bold text-sm text-foreground">{BRAND.name}</span>
             </div>
             <div className="ml-auto">
               <GlobalSearch />

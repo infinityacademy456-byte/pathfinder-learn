@@ -78,7 +78,7 @@ export default function Certificates() {
                     <CardContent className="p-6 text-center space-y-3">
                       <Medal className="h-10 w-10 text-warning mx-auto" />
                       <h3 className="text-lg font-bold text-foreground">{cert.courseTitle}</h3>
-                      <p className="text-sm text-muted-foreground">Issued by Pathfinder Learn</p>
+                      <p className="text-sm text-muted-foreground">Issued by Vidya Learning Hub</p>
                       <p className="text-xs text-muted-foreground">Completed {cert.completedDate}</p>
                       <p className="font-mono text-xs text-muted-foreground">{cert.certificateId}</p>
                       <div className="flex gap-2 justify-center pt-2 flex-wrap">
@@ -173,7 +173,7 @@ export default function Certificates() {
           {viewing && (
             <div className="m-4 border-[3px] border-warning rounded-xl overflow-hidden">
               <div className="border border-warning m-2 rounded-lg p-6 md:p-8 text-center space-y-4" style={{ background: "hsl(45, 100%, 98%)" }}>
-                <p className="text-xl font-bold text-primary">Pathfinder Learn</p>
+                <p className="text-xl font-bold text-primary">Vidya Learning Hub</p>
                 <div className="h-px bg-warning/40 mx-auto w-3/4" />
                 <p className="text-2xl md:text-3xl font-bold text-foreground">Certificate of Completion</p>
                 <p className="text-sm text-muted-foreground">This certifies that</p>

@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useMentor } from "@/contexts/MentorContext";
+import { BRAND } from "@/lib/branding";
 
 const navItems = [
   { title: "Dashboard", url: "/mentor", icon: LayoutDashboard, end: true },
@@ -40,7 +41,7 @@ function MentorSidebar({ onNavigate }: { onNavigate?: () => void }) {
         </div>
         <div>
           <p className="text-sm font-bold text-foreground">Mentor Hub</p>
-          <p className="text-[10px] text-muted-foreground">Pathfinder Learn</p>
+          <p className="text-[10px] text-muted-foreground">{BRAND.name}</p>
         </div>
       </div>
 

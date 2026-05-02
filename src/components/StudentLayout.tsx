@@ -13,6 +13,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { CelebrationModal } from "@/components/CelebrationModal";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { NotificationBell } from "@/components/NotificationBell";
+import { BRAND } from "@/lib/branding";
 
 const navItems = [
   { title: "Home", url: "/dashboard", icon: Home },
@@ -51,7 +52,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         <div className="h-8 w-8 rounded-lg gradient-primary flex items-center justify-center">
           <GraduationCap className="h-5 w-5 text-primary-foreground" />
         </div>
-        <span className="text-sm font-bold text-foreground">Pathfinder Learn</span>
+        <span className="text-sm font-bold text-foreground">{BRAND.name}</span>
       </div>
 
       {/* Nav links */}
@@ -135,7 +136,7 @@ export function StudentLayout() {
               {isMobile && (
                 <div className="flex items-center gap-2">
                   <GraduationCap className="h-5 w-5 text-primary" />
-                  <span className="text-sm font-bold text-foreground">Pathfinder Learn</span>
+                  <span className="text-sm font-bold text-foreground">{BRAND.name}</span>
                 </div>
               )}
             </div>
