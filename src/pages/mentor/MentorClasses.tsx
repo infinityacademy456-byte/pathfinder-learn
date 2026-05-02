@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { CalendarClock, Plus, Edit3, X } from "lucide-react";
 import { useMentor, type ClassSession } from "@/contexts/MentorContext";
 import { toast } from "sonner";
+import { isSafeUrl, safeHref } from "@/lib/safe-url";
 
 export default function MentorClasses() {
   const { classes, batches, currentMentorId, scheduleClass, updateClass, cancelClass } = useMentor();
@@ -24,6 +25,10 @@ export default function MentorClasses() {
 
   const submit = () => {
     if (!form.title || !form.scheduledAt || !form.batchId) { toast.error("Fill required fields"); return; }
+    if (form.meetingLink && !isSafeUrl(form.meetingLink)) {
+      toast.error("Meeting link must be a valid http(s):// URL");
+      return;
+    }
     const payload = { ...form, scheduledAt: new Date(form.scheduledAt).toISOString() };
     if (editing) {
       updateClass(editing.id, payload);
