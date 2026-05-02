@@ -2,7 +2,7 @@ import { useNavigate, useLocation, Outlet } from "react-router-dom";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import {
-  LayoutDashboard, Upload, BookOpen, Users, ClipboardList, Settings, LogOut, Shield, BarChart3, Menu, UserCheck, Layers, Award, Activity
+  LayoutDashboard, Upload, BookOpen, Users, ClipboardList, Settings, LogOut, Shield, BarChart3, Menu, UserCheck, Layers, Award, Activity, Database
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { NavLink } from "@/components/NavLink";
@@ -20,6 +20,7 @@ const navItems = [
   { title: "Certificates", url: "/admin/certificates", icon: Award },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Activity Log", url: "/admin/activity", icon: Activity },
+  { title: "Firestore Users", url: "/admin/firebase-users", icon: Database },
   { title: "Settings", url: "/admin/settings", icon: Settings },
 ];
 
