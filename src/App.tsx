@@ -33,6 +33,7 @@ import AdminSettings from "./pages/admin/AdminSettings";
 import AdminBatches from "./pages/admin/AdminBatches";
 import AdminCertificates from "./pages/admin/AdminCertificates";
 import AdminActivityLog from "./pages/admin/AdminActivityLog";
+import AdminFirebaseUsers from "./pages/admin/AdminFirebaseUsers";
 import ManageEnrollments from "./pages/admin/ManageEnrollments";
 import Analytics from "./pages/Analytics";
 
@@ -103,6 +104,7 @@ const App = () => (
               <Route path="/admin/certificates" element={<AdminCertificates />} />
               <Route path="/admin/analytics" element={<Analytics />} />
               <Route path="/admin/activity" element={<AdminActivityLog />} />
+              <Route path="/admin/firebase-users" element={<AdminFirebaseUsers />} />
               <Route path="/admin/settings" element={<AdminSettings />} />
             </Route>
 

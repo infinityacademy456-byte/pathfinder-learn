@@ -8,6 +8,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { BRAND } from "@/lib/branding";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
+import { FirebaseError } from "firebase/app";
 
 type Role = "student" | "admin" | "mentor";
 
@@ -19,20 +22,51 @@ export default function Login() {
   const [role, setRole] = useState<Role | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [loading, setLoading] = useState(false);
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!role) { toast.error("Please select a role"); return; }
-    if (!email.trim() || !password.trim()) { toast.error("Please enter your email and password"); return; }
-    if (password.length < 4) { toast.error("Password is too short"); return; }
-    localStorage.setItem("userRole", role);
-    if (role === "student") {
-      // In demo mode, map known emails to seeded students; default to first student.
+  const finishLogin = (selectedRole: Role) => {
+    localStorage.setItem("userRole", selectedRole);
+    if (selectedRole === "student") {
       const matched = students.find(s => s.email.toLowerCase() === email.trim().toLowerCase());
       setCurrentStudentId(matched?.id ?? students[0].id);
     }
-    toast.success(`Logged in as ${role}`);
-    navigate(homeFor[role]);
+    toast.success(`Logged in as ${selectedRole}`);
+    navigate(homeFor[selectedRole]);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!role) { toast.error("Please select a role"); return; }
+    if (!email.trim() || !password.trim()) { toast.error("Please enter your email and password"); return; }
+    if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
+
+    setLoading(true);
+    try {
+      if (mode === "signup") {
+        await createUserWithEmailAndPassword(auth, email.trim(), password);
+      } else {
+        await signInWithEmailAndPassword(auth, email.trim(), password);
+      }
+      finishLogin(role);
+    } catch (err) {
+      const code = err instanceof FirebaseError ? err.code : "";
+      // Demo fallback: if Firebase auth isn't configured / unreachable, allow local login.
+      if (code === "auth/network-request-failed" || code === "auth/configuration-not-found") {
+        toast.warning("Firebase unavailable — signed in locally (demo mode)");
+        finishLogin(role);
+      } else {
+        const msg =
+          code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found"
+            ? "Invalid email or password"
+            : code === "auth/email-already-in-use"
+            ? "Email already registered — switch to Sign in"
+            : err instanceof Error ? err.message : "Login failed";
+        toast.error(msg);
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
   const roles: { value: Role; label: string; desc: string; icon: typeof GraduationCap }[] = [
@@ -86,9 +120,19 @@ export default function Login() {
               <Input placeholder="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} className="pl-10" />
             </div>
           </div>
-          <Button type="submit" className="w-full bg-primary text-primary-foreground">
-            Login
+          <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground">
+            {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Login"}
           </Button>
+          <p className="text-center text-xs text-muted-foreground">
+            {mode === "signin" ? "New here?" : "Have an account?"}{" "}
+            <button
+              type="button"
+              onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+              className="text-primary font-medium hover:underline"
+            >
+              {mode === "signin" ? "Create account" : "Sign in"}
+            </button>
+          </p>
         </form>
       </motion.div>
     </div>
