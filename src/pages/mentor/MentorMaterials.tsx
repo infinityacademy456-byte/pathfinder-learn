@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { FileText, Plus, Trash2, FileType2, ClipboardList } from "lucide-react";
 import { useMentor, type Material } from "@/contexts/MentorContext";
 import { toast } from "sonner";
+import { isSafeUrl } from "@/lib/safe-url";
 
 const typeIcon = (t: Material["type"]) => t === "pdf" ? FileType2 : t === "assignment" ? ClipboardList : FileText;
 
@@ -25,6 +26,11 @@ export default function MentorMaterials() {
 
   const submit = () => {
     if (!form.title || !form.batchId) { toast.error("Title & batch required"); return; }
+    // Allow empty url, plain filenames (e.g. notes.pdf), or http(s) URLs only.
+    if (form.url && /^[a-z][a-z0-9+.-]*:/i.test(form.url) && !isSafeUrl(form.url)) {
+      toast.error("URL must be a valid http(s):// link or a plain filename");
+      return;
+    }
     uploadMaterial(form);
     toast.success("Material uploaded — students notified");
     setOpen(false);
