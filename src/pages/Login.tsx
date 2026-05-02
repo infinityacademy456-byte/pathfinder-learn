@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
+import { BRAND } from "@/lib/branding";
 
 type Role = "student" | "admin" | "mentor";
 
@@ -49,7 +50,7 @@ export default function Login() {
               <Infinity className="h-6 w-6 text-primary-foreground" />
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-foreground">Infinity Learning Hub</h1>
+          <h1 className="text-2xl font-bold text-foreground">{BRAND.name}</h1>
           <p className="text-sm text-muted-foreground">Sign in to continue</p>
         </div>
 

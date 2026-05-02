@@ -88,7 +88,7 @@ export default function StudentCertificates() {
           {viewing && (
             <div className="border-4 border-double border-primary/30 rounded-xl p-8 text-center space-y-4 bg-card">
               <Award className="h-12 w-12 text-primary mx-auto" />
-              <p className="text-xs text-muted-foreground uppercase tracking-widest">Infinity Learning Hub</p>
+              <p className="text-xs text-muted-foreground uppercase tracking-widest">Vidya Learning Hub</p>
               <h2 className="text-xl font-bold text-foreground">Certificate of Completion</h2>
               <p className="text-muted-foreground">This certifies that</p>
               <p className="text-lg font-semibold text-foreground">{userProfile.name}</p>

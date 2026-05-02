@@ -32,7 +32,7 @@ export function downloadCertificatePdf(data: CertificatePdfData) {
   doc.setFont("helvetica", "bold");
   doc.setTextColor(60, 90, 200);
   doc.setFontSize(14);
-  doc.text("INFINITY LEARNING HUB", pageW / 2, 30, { align: "center" });
+  doc.text("VIDYA LEARNING HUB", pageW / 2, 30, { align: "center" });
 
   // Title
   doc.setFont("helvetica", "normal");

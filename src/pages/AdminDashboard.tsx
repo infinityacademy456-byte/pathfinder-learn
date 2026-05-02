@@ -246,11 +246,11 @@ export default function AdminDashboard() {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <label className="text-xs text-muted-foreground">Platform Name</label>
-                  <Input defaultValue="Infinity Learning Hub" />
+                  <Input defaultValue="Vidya Learning Hub" />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Support Email</label>
-                  <Input defaultValue="support@infinitylearning.com" />
+                  <Input defaultValue="support@vidyalearning.com" />
                 </div>
                 <div>
                   <label className="text-xs text-muted-foreground">Max Free Courses</label>
