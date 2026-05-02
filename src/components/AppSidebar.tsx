@@ -27,6 +27,7 @@ import {
   SidebarHeader,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { BRAND } from "@/lib/branding";
 
 const mainItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -87,7 +88,7 @@ export function AppSidebar() {
           </div>
           {!collapsed && (
             <span className="text-sm font-bold tracking-tight text-sidebar-primary">
-              Infinity Learning
+              {BRAND.name}
             </span>
           )}
         </div>
