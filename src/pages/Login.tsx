@@ -8,13 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { BRAND } from "@/lib/branding";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-
-type Role = "student" | "admin" | "mentor";
-
-const homeFor: Record<Role, string> = { student: "/dashboard", admin: "/admin", mentor: "/mentor" };
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { homeFor, Role } from "@/contexts/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();

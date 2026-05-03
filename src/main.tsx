@@ -3,11 +3,14 @@ import App from "./App.tsx";
 import "./index.css";
 import { EnrollmentProvider } from "./contexts/EnrollmentContext";
 import { MentorProvider } from "./contexts/MentorContext";
+import { AuthProvider } from "./contexts/AuthContext";
 
 createRoot(document.getElementById("root")!).render(
-  <EnrollmentProvider>
-    <MentorProvider>
-      <App />
-    </MentorProvider>
-  </EnrollmentProvider>
+  <AuthProvider>
+    <EnrollmentProvider>
+      <MentorProvider>
+        <App />
+      </MentorProvider>
+    </EnrollmentProvider>
+  </AuthProvider>
 );
