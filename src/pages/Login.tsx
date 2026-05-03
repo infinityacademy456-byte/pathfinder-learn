@@ -63,12 +63,13 @@ export default function Login() {
         if (storedRole) {
           effectiveRole = storedRole;
         } else {
-          // Bootstrap missing profile with the role selected on the form
-          await setDoc(
-            doc(db, "users", uid),
-            { uid, email: email.trim(), role, createdAt: Date.now() },
-            { merge: true }
-          );
+          // Bootstrap missing profile with default "student" role
+          effectiveRole = "student";
+          await setDoc(doc(db, "users", uid), {
+            email: cred.user.email,
+            role: "student",
+            createdAt: Date.now(),
+          });
         }
       }
 
