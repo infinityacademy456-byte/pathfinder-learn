@@ -8,13 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { BRAND } from "@/lib/branding";
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
 import { FirebaseError } from "firebase/app";
-
-type Role = "student" | "admin" | "mentor";
-
-const homeFor: Record<Role, string> = { student: "/dashboard", admin: "/admin", mentor: "/mentor" };
+import { doc, getDoc, setDoc } from "firebase/firestore";
+import { homeFor, Role } from "@/contexts/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -43,12 +41,40 @@ export default function Login() {
 
     setLoading(true);
     try {
+      let uid: string;
+      let effectiveRole: Role = role;
+
       if (mode === "signup") {
-        await createUserWithEmailAndPassword(auth, email.trim(), password);
+        const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
+        uid = cred.user.uid;
+        // Persist the role chosen at signup
+        await setDoc(
+          doc(db, "users", uid),
+          { uid, email: email.trim(), role, createdAt: Date.now() },
+          { merge: true }
+        );
       } else {
-        await signInWithEmailAndPassword(auth, email.trim(), password);
+        const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+        uid = cred.user.uid;
+        // Always trust Firestore role on sign-in
+        const snap = await getDoc(doc(db, "users", uid));
+        const storedRole = snap.exists() ? (snap.data().role as Role | undefined) : undefined;
+        if (storedRole) {
+          effectiveRole = storedRole;
+        } else {
+          // Bootstrap missing profile with the role selected on the form
+          await setDoc(
+            doc(db, "users", uid),
+            { uid, email: email.trim(), role, createdAt: Date.now() },
+            { merge: true }
+          );
+        }
       }
-      finishLogin(role);
+
+      if (effectiveRole !== role) {
+        toast.info(`Signed in as ${effectiveRole} (your assigned role)`);
+      }
+      finishLogin(effectiveRole);
     } catch (err) {
       const code = err instanceof FirebaseError ? err.code : "";
       // Demo fallback: if Firebase auth isn't configured / unreachable, allow local login.

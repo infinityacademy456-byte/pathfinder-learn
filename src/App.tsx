@@ -61,6 +61,7 @@ const App = () => (
           <Routes>
             {/* Public */}
             <Route path="/" element={<Navigate to="/login" replace />} />
+            <Route path="/student" element={<Navigate to="/dashboard" replace />} />
             <Route path="/login" element={<Login />} />
 
             {/* Student routes */}
