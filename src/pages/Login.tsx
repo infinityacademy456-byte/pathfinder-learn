@@ -47,12 +47,13 @@ export default function Login() {
       if (mode === "signup") {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
         uid = cred.user.uid;
-        // Persist the role chosen at signup
-        await setDoc(
-          doc(db, "users", uid),
-          { uid, email: email.trim(), role, createdAt: Date.now() },
-          { merge: true }
-        );
+        // Default role on signup is always "student"
+        effectiveRole = "student";
+        await setDoc(doc(db, "users", uid), {
+          email: cred.user.email,
+          role: "student",
+          createdAt: Date.now(),
+        });
       } else {
         const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
         uid = cred.user.uid;
@@ -62,12 +63,13 @@ export default function Login() {
         if (storedRole) {
           effectiveRole = storedRole;
         } else {
-          // Bootstrap missing profile with the role selected on the form
-          await setDoc(
-            doc(db, "users", uid),
-            { uid, email: email.trim(), role, createdAt: Date.now() },
-            { merge: true }
-          );
+          // Bootstrap missing profile with default "student" role
+          effectiveRole = "student";
+          await setDoc(doc(db, "users", uid), {
+            email: cred.user.email,
+            role: "student",
+            createdAt: Date.now(),
+          });
         }
       }
 
