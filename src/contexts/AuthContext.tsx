@@ -45,12 +45,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const snap = await getDoc(ref);
         let r: Role | null = (snap.exists() ? (snap.data().role as Role) : null) ?? null;
         if (!r) {
-          // Bootstrap from local selection at sign-in time
-          const local = (localStorage.getItem("userRole") as Role | null) ?? "student";
-          r = local;
+          r = "student";
           await setDoc(
             ref,
-            { uid: u.uid, email: u.email, role: r, createdAt: Date.now() },
+            { email: u.email, role: "student", createdAt: Date.now() },
             { merge: true }
           );
         }
