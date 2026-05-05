@@ -169,7 +169,16 @@ export default function AdminFirebaseUsers() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize text-xs">{u.role || "user"}</Badge>
+                    <Select value={u.role || "student"} onValueChange={(v) => handleRoleChange(u.id, v)}>
+                      <SelectTrigger className="h-8 w-[110px] text-xs capitalize">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="mentor">Mentor</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button size="icon" variant="ghost" onClick={() => handleDelete(u.id)} className="h-8 w-8 text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>
