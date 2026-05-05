@@ -82,6 +82,21 @@ export default function AdminFirebaseUsers() {
     }
   };
 
+  const { user: currentUser } = useAuth();
+  const handleRoleChange = async (id: string, newRole: string) => {
+    if (currentUser?.uid === id) {
+      toast.error("You cannot change your own role");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "users", id), { role: newRole });
+      toast.success(`Role updated to ${newRole}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to update role";
+      toast.error(msg);
+    }
+  };
+
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
