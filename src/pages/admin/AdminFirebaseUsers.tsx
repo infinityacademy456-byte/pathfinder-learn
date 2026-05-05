@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, deleteDoc, doc } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, addDoc, serverTimestamp, deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/contexts/AuthContext";
 import { Database, Trash2, Plus, RefreshCw, AlertCircle } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { Card, CardContent } from "@/components/ui/card";
@@ -80,6 +82,21 @@ export default function AdminFirebaseUsers() {
     }
   };
 
+  const { user: currentUser } = useAuth();
+  const handleRoleChange = async (id: string, newRole: string) => {
+    if (currentUser?.uid === id) {
+      toast.error("You cannot change your own role");
+      return;
+    }
+    try {
+      await updateDoc(doc(db, "users", id), { role: newRole });
+      toast.success(`Role updated to ${newRole}`);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to update role";
+      toast.error(msg);
+    }
+  };
+
   return (
     <div className="p-4 md:p-8 max-w-5xl mx-auto space-y-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
@@ -152,7 +169,16 @@ export default function AdminFirebaseUsers() {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="capitalize text-xs">{u.role || "user"}</Badge>
+                    <Select value={u.role || "student"} onValueChange={(v) => handleRoleChange(u.id, v)}>
+                      <SelectTrigger className="h-8 w-[110px] text-xs capitalize">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="student">Student</SelectItem>
+                        <SelectItem value="mentor">Mentor</SelectItem>
+                        <SelectItem value="admin">Admin</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <Button size="icon" variant="ghost" onClick={() => handleDelete(u.id)} className="h-8 w-8 text-destructive">
                       <Trash2 className="h-4 w-4" />
                     </Button>

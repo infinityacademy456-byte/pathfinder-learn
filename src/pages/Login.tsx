@@ -1,10 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { GraduationCap, Shield, Infinity, Mail, Lock, UserCog } from "lucide-react";
+import { Infinity, Mail, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
 import { toast } from "sonner";
 import { useEnrollment } from "@/contexts/EnrollmentContext";
 import { BRAND } from "@/lib/branding";
@@ -17,43 +16,41 @@ import { homeFor, Role } from "@/contexts/AuthContext";
 export default function Login() {
   const navigate = useNavigate();
   const { setCurrentStudentId, students } = useEnrollment();
-  const [role, setRole] = useState<Role | null>(null);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [loading, setLoading] = useState(false);
 
-  const finishLogin = (selectedRole: Role) => {
-    localStorage.setItem("userRole", selectedRole);
-    if (selectedRole === "student") {
+  const finishLogin = (effectiveRole: Role) => {
+    localStorage.setItem("userRole", effectiveRole);
+    if (effectiveRole === "student" && students.length > 0) {
       const matched = students.find(s => s.email.toLowerCase() === email.trim().toLowerCase());
       setCurrentStudentId(matched?.id ?? students[0].id);
     }
-    toast.success(`Logged in as ${selectedRole}`);
-    navigate(homeFor[selectedRole]);
+    toast.success(`Logged in as ${effectiveRole}`);
+    navigate(homeFor[effectiveRole]);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!role) { toast.error("Please select a role"); return; }
     if (!email.trim() || !password.trim()) { toast.error("Please enter your email and password"); return; }
     if (password.length < 6) { toast.error("Password must be at least 6 characters"); return; }
 
     setLoading(true);
     try {
       let uid: string;
-      let effectiveRole: Role = role;
+      let effectiveRole: Role = "student";
 
       if (mode === "signup") {
         const cred = await createUserWithEmailAndPassword(auth, email.trim(), password);
         uid = cred.user.uid;
-        // Default role on signup is always "student"
-        effectiveRole = "student";
+        // Default role on signup is ALWAYS "student". Admin must promote.
         await setDoc(doc(db, "users", uid), {
           email: cred.user.email,
           role: "student",
           createdAt: Date.now(),
         });
+        effectiveRole = "student";
       } else {
         const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
         uid = cred.user.uid;
@@ -63,7 +60,6 @@ export default function Login() {
         if (storedRole) {
           effectiveRole = storedRole;
         } else {
-          // Bootstrap missing profile with default "student" role
           effectiveRole = "student";
           await setDoc(doc(db, "users", uid), {
             email: cred.user.email,
@@ -73,16 +69,12 @@ export default function Login() {
         }
       }
 
-      if (effectiveRole !== role) {
-        toast.info(`Signed in as ${effectiveRole} (your assigned role)`);
-      }
       finishLogin(effectiveRole);
     } catch (err) {
       const code = err instanceof FirebaseError ? err.code : "";
-      // Demo fallback: if Firebase auth isn't configured / unreachable, allow local login.
       if (code === "auth/network-request-failed" || code === "auth/configuration-not-found") {
-        toast.warning("Firebase unavailable — signed in locally (demo mode)");
-        finishLogin(role);
+        toast.warning("Firebase unavailable — signed in locally as student (demo mode)");
+        finishLogin("student");
       } else {
         const msg =
           code === "auth/invalid-credential" || code === "auth/wrong-password" || code === "auth/user-not-found"
@@ -97,12 +89,6 @@ export default function Login() {
     }
   };
 
-  const roles: { value: Role; label: string; desc: string; icon: typeof GraduationCap }[] = [
-    { value: "student", label: "Student", desc: "Access your courses", icon: GraduationCap },
-    { value: "mentor", label: "Mentor", desc: "Teach & evaluate", icon: UserCog },
-    { value: "admin", label: "Admin", desc: "Manage platform", icon: Shield },
-  ];
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background p-4">
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="w-full max-w-md space-y-6">
@@ -113,28 +99,9 @@ export default function Login() {
             </div>
           </div>
           <h1 className="text-2xl font-bold text-foreground">{BRAND.name}</h1>
-          <p className="text-sm text-muted-foreground">Sign in to continue</p>
-        </div>
-
-        <div className="grid grid-cols-3 gap-2">
-          {roles.map((r) => (
-            <motion.div key={r.value} whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-              <Card
-                className={`cursor-pointer transition-all shadow-card ${
-                  role === r.value
-                    ? "border-2 border-primary ring-2 ring-primary/20"
-                    : "border-border hover:border-muted-foreground/30"
-                }`}
-                onClick={() => setRole(r.value)}
-              >
-                <CardContent className="p-4 text-center space-y-2">
-                  <r.icon className={`h-8 w-8 mx-auto ${role === r.value ? "text-primary" : "text-muted-foreground"}`} />
-                  <p className="text-sm font-semibold text-foreground">{r.label}</p>
-                  <p className="text-[11px] text-muted-foreground">{r.desc}</p>
-                </CardContent>
-              </Card>
-            </motion.div>
-          ))}
+          <p className="text-sm text-muted-foreground">
+            {mode === "signup" ? "Create your student account" : "Sign in to continue"}
+          </p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
@@ -149,8 +116,13 @@ export default function Login() {
             </div>
           </div>
           <Button type="submit" disabled={loading} className="w-full bg-primary text-primary-foreground">
-            {loading ? "Please wait..." : mode === "signup" ? "Create account" : "Login"}
+            {loading ? "Please wait..." : mode === "signup" ? "Create student account" : "Login"}
           </Button>
+          {mode === "signup" && (
+            <p className="text-center text-[11px] text-muted-foreground">
+              All new accounts are created as students. Mentor and admin roles are assigned by an administrator.
+            </p>
+          )}
           <p className="text-center text-xs text-muted-foreground">
             {mode === "signin" ? "New here?" : "Have an account?"}{" "}
             <button
